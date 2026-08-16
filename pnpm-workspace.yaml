@@ -1,0 +1,12 @@
+allowBuilds:
+  electron: true
+  esbuild: true
+  '@tailwindcss/oxide': true
+  electron-winstaller: false
+
+# electron-builder invokes NSIS, whose include loader still hits MAX_PATH on Windows.
+# A hoisted layout keeps its template paths short and makes packaging reliable.
+nodeLinker: hoisted
+
+overrides:
+  '@electron/get': 5.1.0
