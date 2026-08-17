@@ -1,8 +1,9 @@
-import { app, dialog } from 'electron'
+import { app, BrowserWindow, dialog, Notification } from 'electron'
 import updaterPackage from 'electron-updater'
 import { broadcast } from './bus'
 import { getConfig, setConfig } from './config'
 import { t } from './i18n'
+import { showLauncher } from './tray'
 import type { AppUpdateState } from '../shared/types'
 
 // electron-updater is published as CommonJS. Electron runs this bundled main
@@ -38,8 +39,32 @@ function notes(value: unknown): string | null {
   return null
 }
 
+function syncTaskbarProgress(next: AppUpdateState): void {
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (next.status === 'downloading') {
+      win.setProgressBar(Math.max(0.01, Math.min(1, (next.progress ?? 0) / 100)), { mode: 'normal' })
+    } else if (next.status === 'downloaded') {
+      win.setProgressBar(1, { mode: 'normal' })
+    } else if (next.status === 'error' && next.availableVersion) {
+      win.setProgressBar(1, { mode: 'error' })
+    } else {
+      win.setProgressBar(-1)
+    }
+  }
+}
+
+function notifyWhenBackground(title: string, body: string): void {
+  const windows = BrowserWindow.getAllWindows()
+  if (windows.some((win) => win.isFocused())) return
+  if (!Notification.isSupported()) return
+  const notice = new Notification({ title, body })
+  notice.on('click', showLauncher)
+  notice.show()
+}
+
 function update(patch: Partial<AppUpdateState>): AppUpdateState {
   state = { ...state, ...patch }
+  syncTaskbarProgress(state)
   broadcast({ type: 'update', state: { ...state } })
   return { ...state }
 }
@@ -57,7 +82,10 @@ async function promptAvailable(version: string, releaseName?: string | null): Pr
     message: t(`发现 DeepSeek Harness Manager v${version}`, `DeepSeek Harness Manager v${version} is available`),
     detail: releaseName || t('可以立即下载,安装前还会再次等待你的确认。', 'You can download now; installation still waits for your confirmation.')
   })
-  if (response === 0) await downloadUpdate()
+  if (response === 0) {
+    showLauncher()
+    await downloadUpdate()
+  }
   if (response === 2) skipUpdate(version)
 }
 
@@ -137,9 +165,19 @@ export function initUpdater(): void {
       progress: 100,
       error: null
     })
+    notifyWhenBackground(
+      t('软件更新已下载', 'Software update downloaded'),
+      t(`v${info.version} 已准备好,打开应用即可重启安装。`, `v${info.version} is ready. Open the app to restart and install.`)
+    )
   })
   autoUpdater.on('error', (error) => {
     update({ status: 'error', error: error.message, progress: null })
+    if (state.availableVersion) {
+      notifyWhenBackground(
+        t('软件更新下载失败', 'Software update download failed'),
+        t('打开应用可以重试或改用 GitHub Release 手动下载。', 'Open the app to retry or download manually from GitHub Releases.')
+      )
+    }
   })
 
   if (app.isPackaged) {
@@ -175,7 +213,15 @@ export async function downloadUpdate(): Promise<AppUpdateState> {
   initUpdater()
   if (state.status !== 'available' && state.status !== 'error') return getUpdateState()
   try {
-    update({ status: 'downloading', progress: 0, error: null })
+    showLauncher()
+    update({
+      status: 'downloading',
+      progress: 0,
+      transferred: 0,
+      total: null,
+      bytesPerSecond: null,
+      error: null
+    })
     await autoUpdater.downloadUpdate()
   } catch (error) {
     update({ status: 'error', error: error instanceof Error ? error.message : String(error), progress: null })

@@ -1,5 +1,6 @@
 import type { JSX } from 'react'
 import { useHarness } from '../hooks/useHarness'
+import { useAppUpdate } from '../hooks/useAppUpdate'
 import { useTheme } from '../hooks/useTheme'
 import { useI18n } from '../i18n'
 import {
@@ -10,7 +11,8 @@ import {
   ChevronIcon,
   SunIcon,
   MoonIcon,
-  SessionsIcon
+  SessionsIcon,
+  DownloadIcon
 } from '../lib/icons'
 import { StatusPill } from './StatusPill'
 import whaleIcon from '../assets/whale.png'
@@ -28,6 +30,7 @@ interface SidebarProps {
 
 export function Sidebar({ view, setView, collapsed, setCollapsed, width }: SidebarProps): JSX.Element {
   const { state, config, runningTasks } = useHarness()
+  const { state: updateState, showOverlay } = useAppUpdate()
   const [theme, toggleTheme] = useTheme()
   const { lang, t, setLang } = useI18n()
 
@@ -50,6 +53,14 @@ export function Sidebar({ view, setView, collapsed, setCollapsed, width }: Sideb
   // whale: only the whale shows, and clicking it expands the menu again.
   const dshRail = view === 'dsh' && collapsed
   const hidden = width <= 0
+  const showUpdate = updateState && ['available', 'downloading', 'downloaded', 'error'].includes(updateState.status)
+  const updateLabel = updateState?.status === 'downloading'
+    ? t('updates.sidebarDownloading', { progress: Math.round(updateState.progress ?? 0) })
+    : updateState?.status === 'downloaded'
+      ? t('updates.sidebarReady')
+      : updateState?.status === 'error'
+        ? t('updates.sidebarFailed')
+        : t('updates.sidebarAvailable')
 
   return (
     <aside
@@ -117,6 +128,23 @@ export function Sidebar({ view, setView, collapsed, setCollapsed, width }: Sideb
           )
         })}
       </nav>
+
+      {showUpdate && (
+        <div className="px-2.5 pb-2 shrink-0">
+          <button
+            className="w-full flex items-center justify-center gap-2 rounded-[9px] px-2 py-2 text-[11.5px] font-medium"
+            style={{
+              color: updateState.status === 'error' ? 'var(--err)' : 'var(--accent)',
+              background: updateState.status === 'error' ? 'rgba(239,68,68,0.09)' : 'var(--accent-soft)'
+            }}
+            title={collapsed ? updateLabel : undefined}
+            onClick={showOverlay}
+          >
+            <DownloadIcon />
+            {!collapsed && <span className="truncate">{updateLabel}</span>}
+          </button>
+        </div>
+      )}
 
       {/* Footer — hidden in the DSH rail */}
       {!dshRail && (

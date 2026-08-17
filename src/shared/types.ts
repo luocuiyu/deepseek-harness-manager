@@ -331,6 +331,8 @@ export interface DshLauncherApi {
   downloadUpdate(): Promise<AppUpdateState>
   installUpdate(): Promise<void>
   skipUpdate(version: string): Promise<AppUpdateState>
+  /** Copy user-visible diagnostics without exposing Node.js APIs to the renderer. */
+  copyText(text: string): Promise<void>
   /** Show a confirm dialog for an external link, then open it in the system browser if confirmed. */
   confirmOpenExternal(url: string): Promise<boolean>
   /** Show/hide the embedded DSH view; reload when the harness (re)became ready. */

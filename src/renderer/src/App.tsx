@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
 import { HarnessProvider, useHarness } from './hooks/useHarness'
+import { AppUpdateProvider, useAppUpdate } from './hooks/useAppUpdate'
 import { I18nProvider, useI18n } from './i18n'
 import { api } from './lib/api'
 import { Sidebar, type PageId } from './components/Sidebar'
 import { SplashOverlay } from './components/SplashOverlay'
 import { TopBar } from './components/TopBar'
+import { UpdateProgressOverlay } from './components/UpdateProgressOverlay'
 import { Dashboard } from './pages/Dashboard'
 import { Plugins } from './pages/Plugins'
-import { Settings } from './pages/Settings'
+import { Settings, type SettingsTab } from './pages/Settings'
 import { Sessions } from './pages/Sessions'
 
 const SIDEBAR_EXPANDED = 212
@@ -16,6 +18,7 @@ const SIDEBAR_COLLAPSED = 56
 
 function Shell(): JSX.Element {
   const { state, config } = useHarness()
+  const { state: updateState, overlayOpen, hideOverlay } = useAppUpdate()
   const { t } = useI18n()
   const TITLES: Record<PageId, string> = {
     dashboard: t('nav.dashboard'),
@@ -25,6 +28,7 @@ function Shell(): JSX.Element {
   }
   const [view, setView] = useState<PageId | 'dsh'>('dashboard')
   const [collapsed, setCollapsed] = useState(false)
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('dsh')
   // The startup splash plays inside this window; the DSH view (a native child,
   // drawn above the DOM) stays hidden until the splash has finished.
   const [splashDone, setSplashDone] = useState(false)
@@ -35,7 +39,8 @@ function Shell(): JSX.Element {
   const ready = status === 'running' || status === 'external'
   const inDsh = view === 'dsh'
   const splashActive = (config?.splashEnabled ?? true) && !splashDone
-  const showDsh = ready && inDsh && !splashActive
+  const updateOverlayActive = overlayOpen && Boolean(updateState && ['available', 'downloading', 'downloaded', 'error'].includes(updateState.status))
+  const showDsh = ready && inDsh && !splashActive && !updateOverlayActive
   const prevReady = useRef<boolean | null>(null)
   const freshReady = useRef(false)
 
@@ -93,8 +98,8 @@ function Shell(): JSX.Element {
 
   // Show the floating orb while the DSH view is open in orb mode.
   useEffect(() => {
-    api.setOrbVisible(orbMode)
-  }, [orbMode])
+    api.setOrbVisible(orbMode && !updateOverlayActive)
+  }, [orbMode, updateOverlayActive])
 
   // The orb's short click expands the menu (the orb itself already returned to
   // the top-left in the main process).
@@ -131,10 +136,18 @@ function Shell(): JSX.Element {
           ) : page === 'plugins' ? (
             <Plugins />
           ) : (
-            <Settings />
+            <Settings tab={settingsTab} onTabChange={setSettingsTab} />
           )}
         </main>
       </div>
+      <UpdateProgressOverlay
+        onViewDetails={() => {
+          hideOverlay()
+          setSettingsTab('update')
+          setView('settings')
+          setCollapsed(false)
+        }}
+      />
     </div>
   )
 }
@@ -143,7 +156,9 @@ export default function App(): JSX.Element {
   return (
     <HarnessProvider>
       <I18nProvider>
-        <Shell />
+        <AppUpdateProvider>
+          <Shell />
+        </AppUpdateProvider>
       </I18nProvider>
     </HarnessProvider>
   )

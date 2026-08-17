@@ -1,4 +1,4 @@
-import { dialog, ipcMain, shell } from 'electron'
+import { clipboard, dialog, ipcMain, shell } from 'electron'
 import * as balance from './balance'
 import { getConfig, setConfig } from './config'
 import { t } from './i18n'
@@ -68,6 +68,7 @@ export function registerIpc(): void {
   ipcMain.handle('updates:download', () => updater.downloadUpdate())
   ipcMain.handle('updates:install', () => updater.installUpdate())
   ipcMain.handle('updates:skip', (_e, version: string) => updater.skipUpdate(String(version)))
+  ipcMain.handle('clipboard:write', (_e, text: string) => clipboard.writeText(String(text ?? '')))
 
   // External links inside the market README: confirm with a native dialog, then
   // open via the system browser. Never navigates the launcher window itself.

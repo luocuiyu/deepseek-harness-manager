@@ -34,6 +34,7 @@ const api: DshLauncherApi = {
   downloadUpdate: () => ipcRenderer.invoke('updates:download'),
   installUpdate: () => ipcRenderer.invoke('updates:install'),
   skipUpdate: (version) => ipcRenderer.invoke('updates:skip', version),
+  copyText: (text) => ipcRenderer.invoke('clipboard:write', text),
   confirmOpenExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
   setDshActive: (active, reload) => ipcRenderer.send('dsh:set-active', active, reload),
   setDshSidebarWidth: (width) => ipcRenderer.send('dsh:set-sidebar-width', width),

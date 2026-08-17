@@ -10,20 +10,20 @@
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows)
   ![Electron](https://img.shields.io/badge/Electron-43-47848F?style=flat-square&logo=electron)
 
-  [下载最新版](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest) · [查看 v0.2.2](https://github.com/luocuiyu/deepseek-harness-manager/releases/tag/v0.2.2) · [English](README.en.md) · [提交问题](https://github.com/luocuiyu/deepseek-harness-manager/issues)
+  [下载最新版](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest) · [查看 v0.2.3](https://github.com/luocuiyu/deepseek-harness-manager/releases/tag/v0.2.3) · [English](README.en.md) · [提交问题](https://github.com/luocuiyu/deepseek-harness-manager/issues)
 </div>
 
 > [!IMPORTANT]
 > 本项目是独立社区项目，并非 DeepSeek 官方产品。项目基于 [MarcoG-h/DSH-Launcher](https://github.com/MarcoG-h/DSH-Launcher) 的 MIT 许可代码继续开发，完整归属见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-## v0.2.2 重点更新
+## v0.2.3 重点更新
 
-- 将设置页明确拆分为“部署运行环境”和“部署 DeepSeek Harness”，避免把 Node.js 与 DSH 安装混为一谈。
-- 未安装 Node.js 时可以直接打开 Node.js 官方下载页；运行要求为 Node.js 22.19.0 或更高版本。
-- 新增 DSH 预下载、更新与命令验证，减少首次启动时由 `npx` 临时下载造成的等待和超时。
-- 移除便携运行环境入口及相关启动逻辑，默认运行方式与 DeepSeek Harness 官方文档保持一致。
-- 源码下载、更新与重建仅保留给源码模式，普通用户不再看到容易混淆的维护选项。
-- 保留插件、代理预设、软件回收站、会话观察以及启动自动检查更新等 `v0.2.1` 功能。
+- 点击更新提示中的“下载更新”后，立即唤醒主窗口并显示全局下载进度，不再需要自己寻找软件更新页面。
+- 更新进度卡显示百分比、已下载大小、总大小、实时速度和预计剩余时间，可收起到后台继续下载。
+- 侧边栏持续显示下载、等待安装或失败状态；Windows 任务栏同步显示下载进度。
+- 下载完成后提供醒目的“重启并安装”，应用在后台时还会发送 Windows 通知。
+- 下载失败时可以直接重试、打开 GitHub Release 手动下载或复制错误信息。
+- 修复 Release 更新说明直接显示 `<h2>`、`<li>` 等 HTML 标签的问题，并对渲染内容进行安全过滤。
 
 ## 为什么需要它？
 
@@ -145,16 +145,16 @@ DSH 使用 Electron 原生 `WebContentsView` 显示在应用内部，工作区�
 2. 使用 PowerShell 核对 SHA-256。
 3. 哈希与 Release 页面一致后，在 SmartScreen 界面点击“仍要运行”。部分 Windows 版本需要先点击“更多信息”。
 
-`v0.2.2` 的校验命令：
+`v0.2.3` 的校验命令：
 
 ```powershell
-Get-FileHash .\DeepSeek-Harness-Manager-0.2.2-Setup.exe -Algorithm SHA256
+Get-FileHash .\DeepSeek-Harness-Manager-0.2.3-Setup.exe -Algorithm SHA256
 ```
 
 预期 SHA-256：
 
 ```text
-4727B05D3FB1C8BB1F018EE97B30E9C60602AE595DBA04D487E819BB1EE6BB52
+642A6EFB069A70C3F519D2EF9ED1A60FEDC8CB8689F86AFF41FA6DF2273CA92D
 ```
 
 > [!CAUTION]

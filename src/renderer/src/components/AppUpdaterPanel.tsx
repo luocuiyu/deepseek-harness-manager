@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import type { JSX } from 'react'
-import { api, type AppUpdateState } from '../lib/api'
+import { api } from '../lib/api'
 import { DownloadIcon, PowerIcon, RefreshIcon } from '../lib/icons'
 import { useI18n } from '../i18n'
+import { useAppUpdate } from '../hooks/useAppUpdate'
+import { renderMarkdown } from '../lib/markdown'
 
 function size(value: number | null): string {
   if (value == null) return '—'
@@ -13,14 +15,8 @@ function size(value: number | null): string {
 
 export function AppUpdaterPanel(): JSX.Element {
   const { t } = useI18n()
-  const [state, setState] = useState<AppUpdateState | null>(null)
-
-  useEffect(() => {
-    void api.getUpdateState().then(setState)
-    return api.onEvent((event) => {
-      if (event.type === 'update') setState(event.state)
-    })
-  }, [])
+  const { state, download } = useAppUpdate()
+  const releaseNotesHtml = useMemo(() => state?.releaseNotes ? renderMarkdown(state.releaseNotes) : '', [state?.releaseNotes])
 
   const statusText = !state
     ? t('updates.loading')
@@ -59,7 +55,7 @@ export function AppUpdaterPanel(): JSX.Element {
             </div>
             <div className="flex gap-2">
               {(state?.status === 'available' || state?.status === 'error') && state?.availableVersion && (
-                <button className="btn btn-primary btn-sm" onClick={() => void api.downloadUpdate()}>
+                <button className="btn btn-primary btn-sm" onClick={download}>
                   <DownloadIcon /> {t('updates.download')}
                 </button>
               )}
@@ -81,7 +77,15 @@ export function AppUpdaterPanel(): JSX.Element {
 
           {state?.status === 'downloading' && (
             <div className="space-y-1.5">
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-soft)' }}>
+              <div
+                className="h-2 rounded-full overflow-hidden"
+                style={{ background: 'var(--bg-soft)' }}
+                role="progressbar"
+                aria-label={t('updates.downloadProgress')}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(state.progress ?? 0)}
+              >
                 <div className="h-full transition-all" style={{ width: `${Math.max(0, Math.min(100, state.progress ?? 0))}%`, background: 'var(--accent)' }} />
               </div>
               <div className="flex justify-between text-[10.5px]" style={{ color: 'var(--muted)' }}>
@@ -95,7 +99,20 @@ export function AppUpdaterPanel(): JSX.Element {
           {(state?.releaseName || state?.releaseNotes) && (
             <div className="border-t pt-3 space-y-1.5" style={{ borderColor: 'var(--border)' }}>
               {state.releaseName && <div className="font-medium text-[12.5px]">{state.releaseName}</div>}
-              {state.releaseNotes && <div className="text-[11.5px] whitespace-pre-wrap max-h-44 overflow-auto leading-relaxed" style={{ color: 'var(--muted)' }}>{state.releaseNotes}</div>}
+              {state.releaseNotes && (
+                <div
+                  className="market-md max-h-52 overflow-auto select-text"
+                  style={{ color: 'var(--muted)' }}
+                  dangerouslySetInnerHTML={{ __html: releaseNotesHtml }}
+                  onClick={(event) => {
+                    const anchor = (event.target as Element).closest('a')
+                    const href = anchor?.getAttribute('href')
+                    if (!href || !/^https?:/i.test(href)) return
+                    event.preventDefault()
+                    void api.confirmOpenExternal(href)
+                  }}
+                />
+              )}
             </div>
           )}
         </div>

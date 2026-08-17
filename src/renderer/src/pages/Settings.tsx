@@ -24,10 +24,11 @@ function Field({ label, value, onChange, mono = true, hint }: { label: string; v
   )
 }
 
-export function Settings(): JSX.Element {
+export type SettingsTab = 'dsh' | 'api' | 'update' | 'system'
+
+export function Settings({ tab, onTabChange }: { tab: SettingsTab; onTabChange: (tab: SettingsTab) => void }): JSX.Element {
   const { config, saveConfig, tasks, refresh } = useHarness()
   const { t, lang } = useI18n()
-  const [tab, setTab] = useState<'dsh' | 'api' | 'update' | 'system'>('dsh')
   const [form, setForm] = useState<Partial<LauncherConfig>>({})
   const [saved, setSaved] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
@@ -149,7 +150,7 @@ export function Settings(): JSX.Element {
               color: tab === k ? 'var(--accent)' : 'var(--muted)',
               borderColor: tab === k ? 'var(--accent)' : 'transparent'
             }}
-            onClick={() => setTab(k)}
+            onClick={() => onTabChange(k)}
           >
             {k === 'dsh' ? t('settings.dshTitle') : k === 'api' ? t('settings.apiTitle') : k === 'update' ? t('settings.updateAppTitle') : t('settings.systemTitle')}
           </button>
