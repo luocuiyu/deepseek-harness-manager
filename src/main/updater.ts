@@ -1,9 +1,13 @@
 import { app, dialog } from 'electron'
-import { autoUpdater } from 'electron-updater'
+import updaterPackage from 'electron-updater'
 import { broadcast } from './bus'
 import { getConfig, setConfig } from './config'
 import { t } from './i18n'
 import type { AppUpdateState } from '../shared/types'
+
+// electron-updater is published as CommonJS. Electron runs this bundled main
+// entry as ESM, so a named import crashes before the first window is created.
+const { autoUpdater } = updaterPackage
 
 let initialized = false
 let manualCheck = false

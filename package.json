@@ -1,9 +1,9 @@
 {
   "name": "deepseek-harness-manager",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "DeepSeek Harness desktop control center with embedded UI, sessions, plugin provenance, and diagnostics",
   "main": "./out/main/index.js",
-  "author": "Community edition based on work by MarcoG-h",
+  "author": "lcy",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -17,6 +17,7 @@
   "build": {
     "appId": "com.community.deepseek-harness-manager",
     "productName": "DeepSeek Harness Manager",
+    "copyright": "Copyright © 2026 lcy",
     "directories": {
       "output": "release"
     },
