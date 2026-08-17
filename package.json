@@ -1,6 +1,6 @@
 {
   "name": "deepseek-harness-manager",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "DeepSeek Harness desktop control center with embedded UI, sessions, plugin provenance, and diagnostics",
   "main": "./out/main/index.js",
   "author": "lcy",
