@@ -8,7 +8,6 @@ import * as orb from './orb'
 import * as market from './market'
 import * as plugins from './plugins'
 import * as agentPresets from './agent-presets'
-import * as runtime from './runtime'
 import * as updater from './updater'
 import * as sessions from './session-observer'
 import * as diagnostics from './diagnostics'
@@ -50,19 +49,13 @@ export function registerIpc(): void {
   ipcMain.handle('download:harness', () => plugins.downloadHarness())
   ipcMain.handle('download:plugin', (_e, url: string, subdir?: string) => plugins.downloadPlugin(String(url), subdir == null ? undefined : String(subdir)))
 
-  // Install/upgrade of the portable runtime must not race a running harness
-  // (npm writes the files the bundled dsh is executing).
-  const busyGuard = (fn: () => Promise<{ ok: boolean }>): (() => Promise<{ ok: boolean; code: number | null; error?: string }>) => {
-    return async () => {
-      const st = harness.getState().status
-      if (st === 'running' || st === 'starting' || st === 'stopping') {
-        return { ok: false, code: null, error: t('请先停止 dsh,再安装 / 更新运行环境。', 'Stop dsh first, then install / update the runtime.') }
-      }
-      return (await fn()) as { ok: boolean; code: number | null; error?: string }
+  ipcMain.handle('dsh:prepare', async () => {
+    const st = harness.getState().status
+    if (st === 'running' || st === 'starting' || st === 'stopping' || st === 'external') {
+      return { ok: false, code: null, error: t('请先停止 DeepSeek Harness，再部署或更新。', 'Stop DeepSeek Harness before deploying or updating it.') }
     }
-  }
-  ipcMain.handle('runtime:install', busyGuard(runtime.installRuntime))
-  ipcMain.handle('runtime:update', busyGuard(runtime.updateRuntime))
+    return plugins.prepareDsh()
+  })
 
   ipcMain.handle('balance:get', () => balance.getBalance())
 

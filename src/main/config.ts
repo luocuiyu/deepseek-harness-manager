@@ -30,15 +30,11 @@ const DEFAULT_API_PRESETS: ApiPreset[] = [
 function defaults(): LauncherConfig {
   const harnessRepo = firstExisting([process.env.DSH_REPO ?? '', join(home, 'deepseek-harness')])
   const hasSourceCheckout = Boolean(harnessRepo && existsSync(harnessRepo))
-  const runtimeRoot = join(home, '.dsh-runtime')
   const systemLang = (app.getLocale() ?? 'zh').toLowerCase().startsWith('zh') ? 'zh' : 'en'
   return {
-    // A checked-out repo implies we're on the developer machine ⇒ source mode.
-    // Anything else targets the portable runtime (sharing the launcher to others).
+    // A checked-out repo implies we're on a developer machine ⇒ source mode.
+    // Everyone else follows the official system Node.js + npx workflow.
     installMode: hasSourceCheckout ? 'source' : 'npx',
-    runtimeRoot,
-    nodeVersion: '22.20.0',
-    dshVersion: '0.1.0-rc.6',
     harnessRepo,
     harnessRepoUrl: 'https://github.com/deepseek-ai/deepseek-harness.git',
     dshHome: firstExisting([process.env.DSH_HOME ?? '', join(home, '.dsh')]),
@@ -138,8 +134,33 @@ export function getConfig(): LauncherConfig {
   if (cache) return cache
   try {
     const raw = readFileSync(file(), 'utf8')
-    const parsed = JSON.parse(raw) as Partial<LauncherConfig>
-    const base = { ...defaults(), ...parsed }
+    const parsed = JSON.parse(raw) as Omit<Partial<LauncherConfig>, 'installMode'> & {
+      installMode?: LauncherConfig['installMode'] | 'bundled'
+      runtimeRoot?: string
+      nodeVersion?: string
+      dshVersion?: string
+    }
+    const migratedFromBundled = parsed.installMode === 'bundled'
+    const hadLegacyRuntimeFields = Boolean(parsed.runtimeRoot || parsed.nodeVersion || parsed.dshVersion)
+    const {
+      runtimeRoot: _runtimeRoot,
+      nodeVersion: _nodeVersion,
+      dshVersion: _dshVersion,
+      installMode: storedInstallMode,
+      ...currentFields
+    } = parsed
+    const normalized = migratedFromBundled
+      ? {
+          ...currentFields,
+          installMode: 'npx' as const,
+          nodePath: process.platform === 'win32' ? 'npx.cmd' : 'npx',
+          launchArgs: ['@deepseek-ai/dsh']
+        }
+      : {
+          ...currentFields,
+          installMode: storedInstallMode === 'source' ? 'source' as const : 'npx' as const
+        }
+    const base = { ...defaults(), ...normalized }
     const secrets = readSecrets()
     cache = {
       ...base,
@@ -152,7 +173,7 @@ export function getConfig(): LauncherConfig {
     }
     // One-time migration from legacy plaintext fields to Windows DPAPI-backed safeStorage.
     const hadPlaintextSecrets = Boolean(parsed.deepseekApiKey || parsed.githubToken || parsed.apiPresets?.some((preset) => preset.apiKey))
-    if (hadPlaintextSecrets && safeStorage.isEncryptionAvailable()) persist(cache)
+    if ((hadPlaintextSecrets || migratedFromBundled || hadLegacyRuntimeFields) && safeStorage.isEncryptionAvailable()) persist(cache)
   } catch {
     cache = defaults()
   }

@@ -19,17 +19,11 @@ export interface LogLine {
   at: number
 }
 
-export type InstallMode = 'npx' | 'source' | 'bundled'
+export type InstallMode = 'npx' | 'source'
 
 export interface LauncherConfig {
-  /** 'npx' uses the system npx command; 'source' runs a checkout; 'bundled' runs the portable runtime. */
+  /** 'npx' uses the system Node.js/npm toolchain; 'source' runs a repository checkout. */
   installMode: InstallMode
-  /** Directory holding the portable Node runtime + bundled @deepseek-ai/dsh install. */
-  runtimeRoot: string
-  /** Portable Node version pinned by installRuntime (mirrored from npmmirror). */
-  nodeVersion: string
-  /** Bundled @deepseek-ai/dsh version pinned by installRuntime / updateRuntime. */
-  dshVersion: string
   harnessRepo: string
   /** Remote URL used by the one-click download / update in Settings. */
   harnessRepoUrl: string
@@ -322,12 +316,10 @@ export interface DshLauncherApi {
   rebuild(): Promise<CmdResult>
   /** Clone/update the harness repo, install deps, then auto-configure paths. */
   downloadHarness(): Promise<CmdResult>
+  /** Pre-download/update and validate the npm-distributed DeepSeek Harness CLI. */
+  prepareDsh(): Promise<CmdResult>
   /** Clone a plugin from a GitHub repo URL into pluginDir, then install it. An optional repo-relative subdir installs that sub-package (some repos ship plugins in subfolders). */
   downloadPlugin(url: string, subdir?: string): Promise<CmdResult>
-  /** Download + unpack the portable runtime (Node, bundled dsh, pnpm) and auto-configure paths. */
-  installRuntime(): Promise<CmdResult>
-  /** Upgrade only the bundled dsh package inside runtimeRoot; leaves ~/.dsh untouched. */
-  updateRuntime(): Promise<CmdResult>
   /** DeepSeek balance for the configured API key. */
   getBalance(): Promise<BalanceResult>
   /** One page of the plugin market: GitHub repos tagged `dsh-plugin`, sorted by stars. An optional keyword is searched server-side. */

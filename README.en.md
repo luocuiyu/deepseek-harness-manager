@@ -4,7 +4,7 @@ A Windows desktop control center for DeepSeek Harness. It starts the local DSH s
 
 This is an independent community project, not an official DeepSeek product. It is based on [MarcoG-h/DSH-Launcher](https://github.com/MarcoG-h/DSH-Launcher).
 
-Features include an `npx @deepseek-ai/dsh web` default launch mode, embedded DSH, service and tray controls, portable runtime deployment, a read-only session observer, plugin management and provenance, API presets, Windows DPAPI-backed secret storage, and redacted diagnostic exports.
+Features include an `npx @deepseek-ai/dsh web` default launch mode, Node.js installation guidance, DSH pre-download and validation, embedded DSH, service and tray controls, a read-only session observer, plugin management and provenance, API presets, Windows DPAPI-backed secret storage, and redacted diagnostic exports.
 
 Plugin availability is profile-wide and does not prove a specific session invoked a plugin. The UI labels this distinction explicitly.
 

@@ -33,8 +33,8 @@ export function Settings(): JSX.Element {
   const [busy, setBusy] = useState<string | null>(null)
   const [dlBusy, setDlBusy] = useState(false)
   const [dlDone, setDlDone] = useState(false)
-  const [rtBusy, setRtBusy] = useState<'install' | 'update' | null>(null)
-  const [rtDone, setRtDone] = useState(false)
+  const [dshBusy, setDshBusy] = useState(false)
+  const [dshDone, setDshDone] = useState(false)
   const [diagnosticsDone, setDiagnosticsDone] = useState(false)
   // API presets are edited in a dedicated local state (nested array in config).
   const [presets, setPresets] = useState<ApiPreset[]>([])
@@ -115,39 +115,25 @@ export function Settings(): JSX.Element {
     }
   }
 
-  const doInstallRuntime = async (): Promise<void> => {
-    setRtBusy('install')
-    setRtDone(false)
+  const doPrepareDsh = async (): Promise<void> => {
+    setDshBusy(true)
+    setDshDone(false)
     try {
-      const r = await api.installRuntime()
+      const r = await api.prepareDsh()
       await refresh()
-      setRtDone(r.ok)
+      setDshDone(r.ok)
       if (r.ok) {
-        // Deployment complete ⇒ from now on auto-start dsh on launch (the box
-        // reflects the new value after config propagates back into the form).
         await saveConfig({ autoStartOnLaunch: true })
       }
     } finally {
-      setRtBusy(null)
+      setDshBusy(false)
     }
   }
 
-  const doUpdateRuntime = async (): Promise<void> => {
-    setRtBusy('update')
-    try {
-      await api.updateRuntime()
-      await refresh()
-    } finally {
-      setRtBusy(null)
-    }
-  }
-
-  const isBundled = form.installMode === 'bundled'
   const downloadTask = tasks['download:harness']
   const repairTask = tasks['repair']
   const buildTask = tasks['build']
-  const runtimeTask = tasks['runtime:install']
-  const updateTask = tasks['runtime:update']
+  const prepareTask = tasks['dsh:prepare']
 
   return (
     <div className="p-5 space-y-5 max-w-[900px]">
@@ -172,56 +158,52 @@ export function Settings(): JSX.Element {
 
       {tab === 'dsh' && (
       <section className="space-y-4">
-        {/* Quick offline deployment (bundled runtime) */}
+        {/* Step 1: system Node.js environment */}
         <div className="panel p-5 space-y-4">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="min-w-0 space-y-1">
-              <h3 className="section-title">{t('settings.offlineTitle')}</h3>
+              <h3 className="section-title">{t('settings.environmentTitle')}</h3>
               <p className="text-[12.5px] leading-relaxed" style={{ color: 'var(--muted)' }}>
-                {t('settings.offlineDesc.pre')}<span className="mono">@deepseek-ai/dsh</span>{t('settings.offlineDesc.mid')}
-                <strong style={{ color: 'var(--text)' }}>{t('settings.offlineDesc.bold')}</strong>{t('settings.offlineDesc.tail')}
+                {t('settings.environmentDesc')}
+              </p>
+              <p className="text-[12.5px] leading-relaxed" style={{ color: 'var(--muted)' }}>
+                {t('settings.environmentRequirement')} <span className="mono">node --version</span>
+              </p>
+            </div>
+            <button
+              className="btn btn-primary shrink-0"
+              onClick={() => void api.confirmOpenExternal(lang === 'zh' ? 'https://nodejs.org/zh-cn/download' : 'https://nodejs.org/en/download')}
+            >
+              <DownloadIcon /> {t('settings.downloadNode')}
+            </button>
+          </div>
+        </div>
+
+        {/* Step 2: npm-distributed DeepSeek Harness */}
+        <div className="panel p-5 space-y-4">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="min-w-0 space-y-1">
+              <h3 className="section-title">{t('settings.deployDshTitle')}</h3>
+              <p className="text-[12.5px] leading-relaxed" style={{ color: 'var(--muted)' }}>
+                {t('settings.deployDshDesc')}
               </p>
               <p className="text-[12.5px] leading-relaxed" style={{ color: 'var(--muted)' }}>
                 {t('settings.currentMode')}
-                <span
-                  className="badge ml-2"
-                  style={
-                    isBundled
-                      ? { color: 'var(--accent)', background: 'var(--accent-soft)' }
-                      : { color: 'var(--ok)', background: 'color-mix(in srgb, var(--ok) 14%, transparent)' }
-                  }
-                >
-                  {isBundled ? t('settings.modeBundled') : form.installMode === 'npx' ? t('settings.modeNpx') : t('settings.modeSource')}
+                <span className="badge ml-2" style={{ color: 'var(--ok)', background: 'color-mix(in srgb, var(--ok) 14%, transparent)' }}>
+                  {form.installMode === 'source' ? t('settings.modeSource') : t('settings.modeNpx')}
                 </span>
               </p>
-              <p className="text-[12.5px] leading-relaxed" style={{ color: 'var(--muted)' }}>
-                {t('settings.updateNote.pre')} <span className="mono">~/.dsh</span> {t('settings.updateNote.mid')}
-                <span className="mono"> cordis.patch.yml</span> {t('settings.updateNote.tail')}
-              </p>
             </div>
-            <div className="flex gap-2 shrink-0">
-              <button className="btn btn-primary shrink-0" disabled={rtBusy !== null} onClick={() => void doInstallRuntime()}>
-                <DownloadIcon /> {rtBusy === 'install' ? t('settings.deploying') : t('settings.deployBtn')}
-              </button>
-              <button className="btn btn-ghost shrink-0" disabled={rtBusy !== null} onClick={() => void doUpdateRuntime()}>
-                <RefreshIcon /> {rtBusy === 'update' ? t('settings.updating') : t('settings.updateBtn')}
-              </button>
-            </div>
+            <button className="btn btn-primary shrink-0" disabled={dshBusy || form.installMode === 'source'} onClick={() => void doPrepareDsh()}>
+              <DownloadIcon /> {dshBusy ? t('settings.deployingDsh') : t('settings.deployDshBtn')}
+            </button>
           </div>
-          {rtDone && (
-            <p className="text-[12.5px]" style={{ color: 'var(--ok)' }}>
-              {t('settings.deployDone')}
-            </p>
-          )}
-          {runtimeTask && <TaskConsole task={runtimeTask} />}
-          {updateTask && <TaskConsole task={updateTask} />}
-          <p className="text-[11.5px] leading-relaxed" style={{ color: 'var(--muted)' }}>
-            {t('settings.diskNote')}
-            <span className="mono"> {form.runtimeRoot || '—'}</span>
-          </p>
+          {dshDone && <p className="text-[12.5px]" style={{ color: 'var(--ok)' }}>{t('settings.deployDshDone')}</p>}
+          {prepareTask && <TaskConsole task={prepareTask} />}
+          <p className="text-[11.5px] leading-relaxed" style={{ color: 'var(--muted)' }}>{t('settings.userDataSafe')}</p>
         </div>
 
-        {/* Source-mode download — advanced, kept small */}
+        {/* Source-mode download — advanced */}
         <details className="panel p-4 space-y-3">
           <summary
             className="cursor-pointer select-none text-[12px] font-medium"
@@ -249,7 +231,7 @@ export function Settings(): JSX.Element {
         </details>
 
         {/* Maintenance — source mode only */}
-        {!isBundled && (
+        {form.installMode === 'source' && (
           <div className="panel p-5 space-y-4">
             <h3 className="section-title">{t('settings.maintenanceTitle')}</h3>
             <p className="text-[12.5px] leading-relaxed" style={{ color: 'var(--muted)' }}>
@@ -443,11 +425,9 @@ export function Settings(): JSX.Element {
                 <label className="label">{t('settings.runMode')}</label>
                 <select className="input" value={form.installMode ?? 'npx'} onChange={(e) => set('installMode')(e.target.value)}>
                   <option value="npx">{t('settings.modeOptionNpx')}</option>
-                  <option value="bundled">{t('settings.modeOptionBundled')}</option>
                   <option value="source">{t('settings.modeOptionSource')}</option>
                 </select>
               </div>
-              <Field label={t('settings.runtimeRoot')} value={form.runtimeRoot ?? ''} onChange={set('runtimeRoot')} hint={t('settings.runtimeRootHint')} />
               <Field label={t('settings.harnessRepo')} value={form.harnessRepo ?? ''} onChange={set('harnessRepo')} hint={t('settings.harnessRepoHint')} />
               <Field label={t('settings.harnessRepoUrl')} value={form.harnessRepoUrl ?? ''} onChange={set('harnessRepoUrl')} hint={t('settings.harnessRepoUrlHint')} />
               <Field label={t('settings.dshHome')} value={form.dshHome ?? ''} onChange={set('dshHome')} hint={t('settings.dshHomeHint')} />

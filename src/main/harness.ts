@@ -4,7 +4,6 @@ import { createConnection } from 'node:net'
 import { homedir } from 'node:os'
 import { getActiveApiPreset, getConfig } from './config'
 import { t } from './i18n'
-import { bundledEnv, resolveBundledDshBin, resolveBundledNode } from './runtime'
 import { broadcast } from './bus'
 import type { HarnessState, LauncherConfig, LogLine } from '../shared/types'
 
@@ -70,17 +69,6 @@ interface LaunchPlan {
 
 /** Decide how to launch dsh based on the install mode. */
 function launchPlan(cfg: LauncherConfig): LaunchPlan {
-  if (cfg.installMode === 'bundled') {
-    const node = resolveBundledNode()
-    const bin = resolveBundledDshBin()
-    if (!node || !bin) throw new Error(t('内置运行环境未安装 — 请到「设置 → 运行环境」点击「一键安装运行环境」。', 'Built-in runtime not installed — go to Settings → Runtime and click "Install runtime".'))
-    return {
-      cmd: node,
-      args: [...cfg.launchArgs, cfg.profile],
-      cwd: cfg.runtimeRoot,
-      envPatch: bundledEnv()
-    }
-  }
   if (cfg.installMode === 'npx') {
     return {
       cmd: cfg.nodePath || (process.platform === 'win32' ? 'npx.cmd' : 'npx'),
@@ -132,15 +120,14 @@ export async function start(): Promise<{ ok: boolean; error?: string }> {
     exitCode: null,
     lastError: null
   })
-  const modeLabel = cfg.installMode === 'bundled' ? t('内置运行环境', 'bundled runtime') : cfg.installMode === 'npx' ? 'npx' : t('源码版', 'source build')
+  const modeLabel = cfg.installMode === 'npx' ? 'npx' : t('源码版', 'source build')
   pushLine('stderr', t(`[launcher] 启动 dsh profile "${cfg.profile}" (${modeLabel})`, `[launcher] Starting dsh profile "${cfg.profile}" (${modeLabel})`))
   pushLine('stderr', `[launcher] ${plan.cmd} ${plan.args.join(' ')}`)
 
   // Inject the active API vendor's endpoint AND key. harness reads
   // DEEPSEEK_BASE_URL only from the process env at boot (bootstrap-only), and
   // resolves DEEPSEEK_API_KEY per request with the inherited process env ranked
-  // above .credentials.yaml — so both must be provided here at spawn. We merge
-  // after envPatch so a bundled-runtime patch always wins.
+  // above .credentials.yaml — so both must be provided here at spawn.
   const preset = getActiveApiPreset()
   const apiEnv: NodeJS.ProcessEnv = {}
   if (preset.baseUrl) apiEnv.DEEPSEEK_BASE_URL = preset.baseUrl

@@ -4,7 +4,6 @@ import { join, resolve, sep } from 'node:path'
 import { net } from 'electron'
 import { getConfig, setConfig } from './config'
 import { t } from './i18n'
-import { bundledEnv, resolveBundledNode } from './runtime'
 import { runAsync, taskDone, taskLine } from './task'
 import { parseGitHubUrl } from '../shared/github'
 import { getPluginRecord, recordPluginInstall, recordPluginRemoval } from './plugin-ledger'
@@ -35,15 +34,6 @@ function pnpmCmd(args: string[], cwd: string, label: string): Promise<CmdResult>
 
 function dshPluginCmd(profile: string, extra: string[]): { cmd: string; args: string[]; cwd: string; envPatch?: NodeJS.ProcessEnv } {
   const cfg = getConfig()
-  if (cfg.installMode === 'bundled') {
-    // Run the bundled CLI; PATH is prefixed so its internal pnpm resolves to the portable copy.
-    return {
-      cmd: resolveBundledNode() ?? cfg.nodePath,
-      args: [...cfg.launchArgs, 'plugin', '--profile', profile, ...extra],
-      cwd: cfg.runtimeRoot,
-      envPatch: bundledEnv()
-    }
-  }
   if (cfg.installMode === 'npx') {
     return {
       cmd: cfg.nodePath || (process.platform === 'win32' ? 'npx.cmd' : 'npx'),
@@ -211,8 +201,8 @@ export function setEnabled(profile: string, name: string, enabled: boolean): { o
 
 /** `pnpm install` in the harness repo — repairs missing deps like zod. */
 export function repairDeps(): Promise<CmdResult> {
-  if (getConfig().installMode === 'bundled') {
-    return Promise.resolve({ ok: false, code: 1, error: t('内置模式下无需修复源码依赖', 'No need to repair source deps in bundled mode') })
+  if (getConfig().installMode !== 'source') {
+    return Promise.resolve({ ok: false, code: 1, error: t('修复源码依赖仅适用于源码运行方式', 'Source dependency repair is only available in source mode') })
   }
   return pnpmCmd(['install'], getConfig().harnessRepo, 'repair')
 }
@@ -220,8 +210,8 @@ export function repairDeps(): Promise<CmdResult> {
 /** Run the configured build command (default `pnpm run build`) in the harness repo. */
 export function rebuild(): Promise<CmdResult> {
   const cfg = getConfig()
-  if (cfg.installMode === 'bundled') {
-    return Promise.resolve({ ok: false, code: 1, error: t('内置模式下无需重新构建源码', 'No need to rebuild the source in bundled mode') })
+  if (cfg.installMode !== 'source') {
+    return Promise.resolve({ ok: false, code: 1, error: t('重新构建仅适用于源码运行方式', 'Rebuild is only available in source mode') })
   }
   const tokens = cfg.buildCmd.trim().split(/\s+/)
   const cmd = tokens[0] ?? 'pnpm'
@@ -236,6 +226,49 @@ export function rebuild(): Promise<CmdResult> {
 // install forever. GIT_TERMINAL_PROMPT=0 makes git fail fast instead.
 const GIT_ENV: NodeJS.ProcessEnv = { GIT_TERMINAL_PROMPT: '0' }
 const GIT_TIMEOUT_MS = 6 * 60_000
+
+/**
+ * Pre-download/update the npm-distributed CLI and verify that it can execute.
+ * npx keeps the package in its normal user cache, so later launches do not
+ * spend the launcher's readiness timeout downloading a new release.
+ */
+export async function prepareDsh(): Promise<CmdResult> {
+  const cfg = getConfig()
+  const label = 'dsh:prepare'
+  if (cfg.installMode !== 'npx') {
+    taskLine(label, t('[dsh] 当前为源码运行方式，无需部署 npm 版本。', '[dsh] Source mode is active; the npm build does not need to be deployed.'), 'stderr')
+    taskDone(label, 1)
+    return { ok: false, code: 1, error: t('当前为源码运行方式', 'Source mode is active') }
+  }
+
+  const cmd = cfg.nodePath || (process.platform === 'win32' ? 'npx.cmd' : 'npx')
+  const packageArgs = cfg.launchArgs.length ? cfg.launchArgs : ['@deepseek-ai/dsh']
+  taskLine(label, t('[dsh] 正在通过官方 npx 方式下载 / 更新并验证 DeepSeek Harness…', '[dsh] Downloading/updating and validating DeepSeek Harness through the official npx workflow…'))
+  const result = await runAsync(
+    cmd,
+    ['--yes', ...packageArgs, '--help'],
+    homedir(),
+    label,
+    process.platform === 'win32' && /\.(cmd|bat)$/i.test(cmd),
+    { DSH_HOME: cfg.dshHome },
+    10 * 60_000
+  )
+  if (!result.ok) {
+    return {
+      ...result,
+      error: result.error ?? t('部署失败。请先安装 Node.js 22.19.0 或更高版本，然后重试。', 'Deployment failed. Install Node.js 22.19.0 or later, then try again.')
+    }
+  }
+
+  setConfig({
+    installMode: 'npx',
+    nodePath: process.platform === 'win32' ? 'npx.cmd' : 'npx',
+    launchArgs: ['@deepseek-ai/dsh']
+  })
+  taskLine(label, t('[dsh] ✔ DeepSeek Harness 已下载并通过运行验证。', '[dsh] ✔ DeepSeek Harness is downloaded and passed the launch validation.'))
+  taskDone(label, 0)
+  return result
+}
 
 /** Attach a personal access token to an https GitHub clone URL (for private repos). */
 function authedCloneUrl(url: string, token: string | undefined): string {

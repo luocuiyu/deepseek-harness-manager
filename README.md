@@ -38,7 +38,7 @@ Manager 将这些步骤收敛成一个桌面应用：
 ```mermaid
 flowchart LR
     A["双击鲸鱼图标"] --> B{"3080 端口已有 DSH?"}
-    B -- "否" --> C["启动 npx / 便携运行环境"]
+    B -- "否" --> C["使用系统 Node.js / npx 启动"]
     B -- "是" --> D["识别并接入外部实例"]
     C --> E["等待服务就绪"]
     D --> F["内嵌 DSH Web UI"]
@@ -104,7 +104,7 @@ DSH 使用 Electron 原生 `WebContentsView` 显示在应用内部，工作区�
 | 来源追踪 | 官方、第三方、本地开发、用户安装、历史推断 | 同时标注 confirmed / inferred 可信度 |
 | API 管理 | 多厂商预设、Base URL、API Key、余额查询 | 切换后随 DSH 重启注入 |
 | 应用内更新 | 启动检查、更新提示、下载进度、重启安装 | 更新源为本仓库 GitHub Releases |
-| 便携部署 | Node、npm、pnpm、DSH 一键安装 | 没有 Node.js 的 Windows 电脑也能使用 |
+| 安装引导 | Node.js 官网入口、DSH 预下载与验证 | 避免首次启动时临时下载导致超时 |
 | 系统托盘 | 最小化到托盘、状态灯、单实例唤醒 | 再次双击快捷方式会显示已有窗口 |
 | 故障诊断 | 脱敏配置、进程状态、会话概览、最近日志 | 报告不会包含 API Key 和 GitHub Token |
 
@@ -170,7 +170,12 @@ npx @deepseek-ai/dsh web
 
 ### 没有 Node.js
 
-进入“设置 → DSH 下载 / 更新”，点击“快速离线部署”。Manager 会准备便携 Node、npm、pnpm 和 `@deepseek-ai/dsh`，随后自动切换到内置运行环境。
+进入“设置 → DSH 部署 / 修复”：
+
+1. 在“部署运行环境”中打开 Node.js 官网，安装 Node.js 22.19.0 或更高版本。
+2. 重新打开 Manager，在“部署 DeepSeek Harness”中预下载并验证 `@deepseek-ai/dsh`。
+
+Manager 不再提供便携 Node 环境，普通运行方式与官方文档保持一致。
 
 ## 应用内更新
 
@@ -182,12 +187,11 @@ npx @deepseek-ai/dsh web
 
 `v0.1.x` 需要手动安装一次 `v0.2.1`；从 `v0.2.1` 开始，后续版本可以使用应用内更新。
 
-## 三种运行模式
+## 两种运行模式
 
 | 模式 | 适用场景 | 实际启动方式 |
 | --- | --- | --- |
 | 本机 npx | 已安装 Node.js，绝大多数用户 | `npx @deepseek-ai/dsh web` |
-| 内置运行环境 | 不希望安装 Node，或需要便携部署 | Manager 管理的 Node + DSH |
 | 源码模式 | 开发、调试或修改 DeepSeek Harness 源码 | 本机 Node 运行 Harness checkout |
 
 ## 配置与数据安全
