@@ -1,6 +1,6 @@
 <div align="center">
   <img src="resources/icon.png" width="112" alt="DeepSeek Harness Manager 蓝色鲸鱼图标" />
-  <h1>DeepSeek Harness Manager</h1>
+  <h1>DeepSeek Harness Manager｜DeepSeek Harness 桌面端</h1>
   <p><strong>把 <code>npx @deepseek-ai/dsh web</code> 变成可以双击启动、独立运行和集中管理的 Windows 桌面应用。</strong></p>
   <p>自动启动或接管本机 DSH，在自己的窗口中内嵌 Web UI，并提供会话观察、插件与代理预设管理、软件回收站、API 切换、系统托盘和应用内更新。</p>
 
