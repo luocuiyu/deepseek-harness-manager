@@ -1,4 +1,8 @@
 import type {
+  AgentPresetInfo,
+  AgentPresetListResult,
+  AgentPresetTrashInfo,
+  AppUpdateState,
   ApiPreset,
   BalanceData,
   BalanceResult,
@@ -21,6 +25,10 @@ import type {
 } from '../../../shared/types'
 
 export type {
+  AgentPresetInfo,
+  AgentPresetListResult,
+  AgentPresetTrashInfo,
+  AppUpdateState,
   ApiPreset,
   BalanceData,
   BalanceResult,

@@ -7,7 +7,9 @@ import * as harness from './harness'
 import * as orb from './orb'
 import * as market from './market'
 import * as plugins from './plugins'
+import * as agentPresets from './agent-presets'
 import * as runtime from './runtime'
+import * as updater from './updater'
 import * as sessions from './session-observer'
 import * as diagnostics from './diagnostics'
 import { registerEmbeddedView } from './webview'
@@ -36,6 +38,12 @@ export function registerIpc(): void {
   ipcMain.handle('plugins:setEnabled', (_e, name: string, enabled: boolean) =>
     plugins.setEnabled(getConfig().profile, String(name), Boolean(enabled))
   )
+  ipcMain.handle('agent-presets:list', () => agentPresets.listAgentPresets())
+  ipcMain.handle('agent-presets:open', (_e, id?: string) => agentPresets.openAgentPreset(id == null ? undefined : String(id)))
+  ipcMain.handle('agent-presets:remove', (_e, id: string, force?: boolean) => agentPresets.removeAgentPreset(String(id), Boolean(force)))
+  ipcMain.handle('agent-presets:trash:open', () => agentPresets.openAgentPresetTrash())
+  ipcMain.handle('agent-presets:trash:restore', (_e, trashId: string) => agentPresets.restoreAgentPreset(String(trashId)))
+  ipcMain.handle('agent-presets:trash:delete', (_e, trashId: string) => agentPresets.deleteAgentPresetPermanently(String(trashId)))
 
   ipcMain.handle('build:repair', () => plugins.repairDeps())
   ipcMain.handle('build:rebuild', () => plugins.rebuild())
@@ -61,6 +69,12 @@ export function registerIpc(): void {
   // Plugin market (GitHub search, unauthenticated).
   ipcMain.handle('market:search', (_e, page: number, query?: string) => market.searchMarket(page, query))
   ipcMain.handle('market:readme', (_e, owner: string, repo: string) => market.fetchReadme(String(owner), String(repo)))
+
+  ipcMain.handle('updates:get', () => updater.getUpdateState())
+  ipcMain.handle('updates:check', () => updater.checkForUpdates(true))
+  ipcMain.handle('updates:download', () => updater.downloadUpdate())
+  ipcMain.handle('updates:install', () => updater.installUpdate())
+  ipcMain.handle('updates:skip', (_e, version: string) => updater.skipUpdate(String(version)))
 
   // External links inside the market README: confirm with a native dialog, then
   // open via the system browser. Never navigates the launcher window itself.

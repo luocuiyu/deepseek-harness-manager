@@ -2,7 +2,7 @@
   <img src="resources/icon.png" width="112" alt="DeepSeek Harness Manager 蓝色鲸鱼图标" />
   <h1>DeepSeek Harness Manager</h1>
   <p><strong>把 <code>npx @deepseek-ai/dsh web</code> 变成真正可以双击启动的 Windows 桌面软件。</strong></p>
-  <p>自动启动或接管本机 DSH，在独立窗口中内嵌 Web UI，并提供会话观察、插件管理、托盘运行、API 切换和安全诊断。</p>
+  <p>自动启动或接管本机 DSH，在独立窗口中内嵌 Web UI，并提供会话观察、插件与代理预设管理、应用内更新、托盘运行、API 切换和安全诊断。</p>
 
   [![Release](https://img.shields.io/github/v/release/luocuiyu/deepseek-harness-manager?style=flat-square&color=1677ff)](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest)
   [![Downloads](https://img.shields.io/github/downloads/luocuiyu/deepseek-harness-manager/total?style=flat-square)](https://github.com/luocuiyu/deepseek-harness-manager/releases)
@@ -42,7 +42,7 @@ flowchart LR
 
 ## 实际界面
 
-以下截图来自当前 `v0.1.0` Windows 版本，而不是设计稿。
+以下截图来自实际 Windows 安装版本，而不是设计稿；`v0.2.0` 在此基础上新增代理预设管理、软件回收站与应用内更新。
 
 ### 内嵌 DeepSeek Harness
 
@@ -78,6 +78,9 @@ DSH 通过 Electron 原生 `WebContentsView` 显示在应用内部。任务栏�
 | 实时日志 | stdout/stderr、自动滚动、任务进度 | 启动失败时可以直接定位错误 |
 | 会话观察 | 会话目录、运行状态、父子会话、代理预设 | 数据来自本机 DSH，只读展示 |
 | 插件管理 | 安装、启用、停用、卸载、本地扫描 | 支持 GitHub、本地目录和 npm spec |
+| 代理预设管理 | 扫描 `.agent-presets`、占用检测、打开目录 | 正确区分 Agent Preset 与第三方插件 |
+| 软件回收站 | 恢复、冲突保护、永久删除 | 独立于 Windows 回收站，首次删除不会丢失文件 |
+| 应用内更新 | 每次启动检查、版本提示、进度、重启安装 | 使用 GitHub Releases；下载和安装均由用户确认 |
 | 插件市场 | 搜索、分页、README 预览、私有仓库 Token | GitHub 外部链接打开前会确认 |
 | 来源追踪 | 官方、第三方、本地开发、用户安装、历史推断 | 同时标注 confirmed / inferred 可信度 |
 | API 管理 | 多厂商预设、Base URL、API Key、余额查询 | 切换后随 DSH 重启注入 |
@@ -104,7 +107,7 @@ Manager 会维护独立的插件安装台账，并结合 profile 中已有的依
 ### Windows 安装包（推荐）
 
 1. 打开 [Releases](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest)。
-2. 下载 `DeepSeek-Harness-Manager-0.1.0-Setup.exe`。
+2. 下载最新的 `DeepSeek-Harness-Manager-<版本>-Setup.exe`。
 3. 运行安装向导，选择安装目录。
 4. 安装完成后，双击桌面或开始菜单中的鲸鱼图标。
 
@@ -139,6 +142,7 @@ npx @deepseek-ai/dsh web
 | Manager 普通配置 | Electron `userData/launcher-config.json` |
 | API Key / GitHub Token | `safeStorage` 加密后写入 `launcher-secrets.bin`；Windows 使用 DPAPI |
 | 插件来源台账 | Electron `userData/plugin-provenance.json` |
+| 代理预设回收站 | Electron `userData/agent-preset-trash`；只有再次确认“永久删除”才清除 |
 | DSH profiles / sessions / storage | 默认位于 `~/.dsh`，Manager 不会迁移或覆盖 |
 | 本地插件目录 | 默认 `~/DSH-Plugin`，可以在设置中修改 |
 | 诊断报告 | 由用户手动导出，秘密值替换为 `[configured]` |
@@ -169,6 +173,18 @@ npx @deepseek-ai/dsh web
 <summary><strong>插件为什么显示“历史安装·推断”？</strong></summary>
 
 说明插件在来源台账建立之前就已存在。Manager 会根据包名和依赖 spec 推断来源，但不会伪装成已确认信息。通过 Manager 新安装的插件会记录为 confirmed。
+</details>
+
+<details>
+<summary><strong>为什么 DSH 里能选择某个预设，插件页却显示 0？</strong></summary>
+
+代理预设与第三方插件是两套机制。例如 `Anchored Standard` 位于 `DSH_HOME/.agent-presets`，不是当前 profile 的 npm 插件依赖。请进入“第三方插件管理 → 代理预设”查看、恢复或管理。
+</details>
+
+<details>
+<summary><strong>软件更新会自动安装吗？</strong></summary>
+
+不会。Manager 每次启动会自动检查 GitHub Releases，发现新版本后提示；下载和“重启并安装”都需要用户主动确认。选择“跳过此版本”后，只有出现更高版本才再次提示。
 </details>
 
 ## 本地开发
@@ -205,7 +221,8 @@ pnpm dist
 - [ ] 更完整的会话事件时间线与工具调用观察
 - [ ] 插件安装前权限与变更预览
 - [ ] 插件更新检查、回滚与快照
-- [ ] 自动更新与可验证的发布签名
+- [x] GitHub Releases 应用内更新（启动检查、下载进度、重启安装）
+- [ ] 可验证的 Windows 代码签名
 - [ ] 更多 DSH profile 管理能力
 - [ ] macOS / Linux 适配评估
 

@@ -6,6 +6,7 @@ import { useI18n } from '../i18n'
 import { TrashIcon, PlayIcon, DownloadIcon } from '../lib/icons'
 import { TaskConsole } from '../components/TaskConsole'
 import { MarketTab } from '../components/MarketTab'
+import { AgentPresetsTab } from '../components/AgentPresetsTab'
 import { parseGitHubUrl } from '../../../shared/github'
 
 export function Plugins(): JSX.Element {
@@ -15,7 +16,7 @@ export function Plugins(): JSX.Element {
   const [spec, setSpec] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [tab, setTab] = useState<'local' | 'market'>('local')
+  const [tab, setTab] = useState<'local' | 'presets' | 'market'>('local')
 
   const load = useCallback(async () => {
     try {
@@ -88,7 +89,7 @@ export function Plugins(): JSX.Element {
 
       {/* Tabs: local plugins / plugin market */}
       <div className="flex gap-1 border-b" style={{ borderColor: 'var(--border)' }}>
-        {(['local', 'market'] as const).map((k) => (
+        {(['local', 'presets', 'market'] as const).map((k) => (
           <button
             key={k}
             className="border-b-2 px-3 pb-2 text-[13px] font-medium transition-colors"
@@ -98,13 +99,15 @@ export function Plugins(): JSX.Element {
             }}
             onClick={() => setTab(k)}
           >
-            {k === 'local' ? t('plugins.tabLocal') : t('plugins.tabMarket')}
+            {k === 'local' ? t('plugins.tabLocal') : k === 'presets' ? t('plugins.tabPresets') : t('plugins.tabMarket')}
           </button>
         ))}
       </div>
 
       {tab === 'market' ? (
         <MarketTab installed={installed} local={local} onRefresh={() => void load()} />
+      ) : tab === 'presets' ? (
+        <AgentPresetsTab />
       ) : (
         <>
           {/* Install */}

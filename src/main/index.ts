@@ -12,6 +12,7 @@ import { start as startDsh, stopSync } from './harness'
 import { ensureShortcuts } from './shortcuts'
 import { preloadPath } from './preload'
 import { hideToTray, initTray, markQuitting, showLauncher } from './tray'
+import { initUpdater } from './updater'
 
 const here = dirname(fileURLToPath(import.meta.url))
 
@@ -115,6 +116,7 @@ if (!gotTheLock) {
     }
     const win = createWindow()
     initTray(win)
+    initUpdater()
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })

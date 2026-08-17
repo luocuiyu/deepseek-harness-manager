@@ -1,6 +1,6 @@
 {
   "name": "deepseek-harness-manager",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "DeepSeek Harness desktop control center with embedded UI, sessions, plugin provenance, and diagnostics",
   "main": "./out/main/index.js",
   "author": "Community edition based on work by MarcoG-h",
@@ -20,6 +20,14 @@
     "directories": {
       "output": "release"
     },
+    "artifactName": "DeepSeek-Harness-Manager-${version}-Setup.${ext}",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "luocuiyu",
+        "repo": "deepseek-harness-manager"
+      }
+    ],
     "files": [
       "out/**/*"
     ],
@@ -52,6 +60,7 @@
   },
   "dependencies": {
     "dompurify": "^3.4.13",
+    "electron-updater": "^6.8.9",
     "marked": "^18.0.9",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

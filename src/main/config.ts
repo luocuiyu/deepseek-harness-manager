@@ -59,7 +59,8 @@ function defaults(): LauncherConfig {
     autoStartOnLaunch: true,
     floatingWhale: false,
     marketPageSize: 30,
-    githubToken: ''
+    githubToken: '',
+    skippedUpdateVersion: ''
   }
 }
 

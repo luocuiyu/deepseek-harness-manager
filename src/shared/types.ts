@@ -65,6 +65,8 @@ export interface LauncherConfig {
   marketPageSize: number
   /** Optional GitHub personal access token, used to clone private plugin repos. */
   githubToken?: string
+  /** Version the user chose to ignore until a newer release appears. */
+  skippedUpdateVersion?: string
 }
 
 /** An OpenAI-compatible API vendor preset: model base URL + optional balance endpoint. */
@@ -145,6 +147,65 @@ export interface PluginListResult {
   local: LocalPlugin[]
 }
 
+export type AgentPresetOrigin = 'user-directory' | 'official' | 'unknown'
+
+export interface AgentPresetInfo {
+  id: string
+  name: string
+  description: string
+  path: string
+  configPath: string
+  origin: AgentPresetOrigin
+  originConfidence: ProvenanceConfidence
+  fileCount: number
+  totalBytes: number
+  updatedAt: number
+  usedBySessions: Array<{ sessionId: string; title: string; running: boolean }>
+}
+
+export interface AgentPresetListResult {
+  root: string
+  presets: AgentPresetInfo[]
+  trashRoot: string
+  trash: AgentPresetTrashInfo[]
+  usageAvailable: boolean
+  usageError?: string
+}
+
+export interface AgentPresetTrashInfo {
+  trashId: string
+  presetId: string
+  name: string
+  description: string
+  originalPath: string
+  deletedAt: number
+  fileCount: number
+  totalBytes: number
+}
+
+export interface RemoveAgentPresetResult extends CmdResult {
+  blocked?: boolean
+  recoverable?: boolean
+  usedBySessions?: Array<{ sessionId: string; title: string; running: boolean }>
+}
+
+export type UpdateStatus = 'idle' | 'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error'
+
+export interface AppUpdateState {
+  status: UpdateStatus
+  currentVersion: string
+  availableVersion: string | null
+  releaseName: string | null
+  releaseNotes: string | null
+  releaseDate: string | null
+  progress: number | null
+  transferred: number | null
+  total: number | null
+  bytesPerSecond: number | null
+  error: string | null
+  checkedAt: number | null
+}
+
 export interface TaskEvent {
   label: string
   status: 'start' | 'end'
@@ -161,6 +222,7 @@ export type LauncherEvent =
   | { type: 'state'; state: HarnessState }
   | { type: 'log'; stream: 'stdout' | 'stderr'; line: string; at: number }
   | { type: 'task'; task: TaskEvent }
+  | { type: 'update'; state: AppUpdateState }
 
 export interface BootstrapState {
   state: HarnessState
@@ -250,6 +312,12 @@ export interface DshLauncherApi {
   installPlugin(spec: string): Promise<CmdResult>
   removePlugin(name: string): Promise<CmdResult>
   setPluginEnabled(name: string, enabled: boolean): Promise<{ ok: boolean; changed: boolean; bundles: string[] }>
+  listAgentPresets(): Promise<AgentPresetListResult>
+  openAgentPreset(id?: string): Promise<{ ok: boolean; error?: string }>
+  removeAgentPreset(id: string, force?: boolean): Promise<RemoveAgentPresetResult>
+  openAgentPresetTrash(): Promise<{ ok: boolean; error?: string }>
+  restoreAgentPreset(trashId: string): Promise<CmdResult>
+  deleteAgentPresetPermanently(trashId: string): Promise<CmdResult>
   repairDeps(): Promise<CmdResult>
   rebuild(): Promise<CmdResult>
   /** Clone/update the harness repo, install deps, then auto-configure paths. */
@@ -266,6 +334,11 @@ export interface DshLauncherApi {
   searchMarket(page: number, query?: string): Promise<MarketPage>
   /** Raw markdown of a repository README for the market detail modal. */
   fetchMarketReadme(owner: string, repo: string): Promise<MarketReadme>
+  getUpdateState(): Promise<AppUpdateState>
+  checkForUpdates(): Promise<AppUpdateState>
+  downloadUpdate(): Promise<AppUpdateState>
+  installUpdate(): Promise<void>
+  skipUpdate(version: string): Promise<AppUpdateState>
   /** Show a confirm dialog for an external link, then open it in the system browser if confirmed. */
   confirmOpenExternal(url: string): Promise<boolean>
   /** Show/hide the embedded DSH view; reload when the harness (re)became ready. */

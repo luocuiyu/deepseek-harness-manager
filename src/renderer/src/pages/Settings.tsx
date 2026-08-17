@@ -5,6 +5,7 @@ import { useHarness } from '../hooks/useHarness'
 import { useI18n } from '../i18n'
 import { TaskConsole } from '../components/TaskConsole'
 import { Toggle } from '../components/Toggle'
+import { AppUpdaterPanel } from '../components/AppUpdaterPanel'
 import { DownloadIcon, RefreshIcon, PowerIcon, PlusIcon, TrashIcon } from '../lib/icons'
 import whaleIcon from '../assets/whale.png'
 import rueIcon from '../assets/rue.png'
@@ -26,7 +27,7 @@ function Field({ label, value, onChange, mono = true, hint }: { label: string; v
 export function Settings(): JSX.Element {
   const { config, saveConfig, tasks, refresh } = useHarness()
   const { t, lang } = useI18n()
-  const [tab, setTab] = useState<'dsh' | 'api' | 'system'>('dsh')
+  const [tab, setTab] = useState<'dsh' | 'api' | 'update' | 'system'>('dsh')
   const [form, setForm] = useState<Partial<LauncherConfig>>({})
   const [saved, setSaved] = useState(false)
   const [busy, setBusy] = useState<string | null>(null)
@@ -154,7 +155,7 @@ export function Settings(): JSX.Element {
 
       {/* tab bar — click to jump straight to the section */}
       <div className="flex gap-1 border-b" style={{ borderColor: 'var(--border)' }}>
-        {(['dsh', 'api', 'system'] as const).map((k) => (
+        {(['dsh', 'api', 'update', 'system'] as const).map((k) => (
           <button
             key={k}
             className="border-b-2 px-3 pb-2 text-[13px] font-medium transition-colors"
@@ -164,7 +165,7 @@ export function Settings(): JSX.Element {
             }}
             onClick={() => setTab(k)}
           >
-            {k === 'dsh' ? t('settings.dshTitle') : k === 'api' ? t('settings.apiTitle') : t('settings.systemTitle')}
+            {k === 'dsh' ? t('settings.dshTitle') : k === 'api' ? t('settings.apiTitle') : k === 'update' ? t('settings.updateAppTitle') : t('settings.systemTitle')}
           </button>
         ))}
       </div>
@@ -378,6 +379,8 @@ export function Settings(): JSX.Element {
         </div>
       </section>
       )}
+
+      {tab === 'update' && <AppUpdaterPanel />}
 
       {tab === 'system' && (
       <section className="space-y-4">
