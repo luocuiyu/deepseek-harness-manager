@@ -8,6 +8,12 @@ Features include an `npx @deepseek-ai/dsh web` default launch mode, Node.js inst
 
 Plugin availability is profile-wide and does not prove a specific session invoked a plugin. The UI labels this distinction explicitly.
 
+## v0.3.0 — Silver-blue glass
+
+A wallpaper welcome page, compact sidebar, adjustable glass surfaces and a skippable startup reveal. Appearance updates preserve the embedded DSH editor and its draft. The shipped official Messages endpoint is corrected to `/anthropic`, with a narrowly scoped migration that preserves custom gateways.
+
+Download the Windows x64 installer from [Releases](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest). Release assets include `latest.yml` and a blockmap for in-app updates. See [CHANGELOG.md](CHANGELOG.md) for release details.
+
 ## Development
 
 ```powershell

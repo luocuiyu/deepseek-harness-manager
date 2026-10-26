@@ -28,7 +28,7 @@ const DARK_EXIT_MS = 520
 // Absolute fallback: never leave the overlay hanging if the timeline stalls.
 const SAFETY_MS = 5400
 
-export function SplashOverlay({ onDone }: { onDone: () => void }): JSX.Element | null {
+function ClassicSplash({ onDone }: { onDone: () => void }): JSX.Element | null {
   const { config } = useHarness()
   const [theme] = useTheme()
   const [exiting, setExiting] = useState(false)
@@ -131,4 +131,29 @@ export function SplashOverlay({ onDone }: { onDone: () => void }): JSX.Element |
       </div>
     </div>
   )
+}
+
+
+/** Offline wallpaper reveal. Skip is always available; reduced motion skips the wait. */
+function GlassSplash({ onDone }: { onDone: () => void }): JSX.Element {
+  const { config } = useHarness()
+  const zh = config?.language !== 'en'
+  const done = useRef(onDone)
+  done.current = onDone
+  useEffect(() => {
+    const timer = setTimeout(() => done.current(), matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 2800)
+    const key = (event: KeyboardEvent): void => { if (event.key === 'Escape') done.current() }
+    window.addEventListener('keydown', key)
+    return () => { clearTimeout(timer); window.removeEventListener('keydown', key) }
+  }, [])
+  return <div className="glass-splash" style={{ backgroundImage: 'linear-gradient(rgba(25, 35, 57, .52), rgba(25, 35, 57, .66)), url("./wallpaper.webp")' }} role="dialog" aria-label={zh ? '启动画面' : 'Starting'}>
+    <div className="glass-splash-brand"><span>DeepSeek</span><small>HARNESS MANAGER</small><i /><p>YOUR SPACE. YOUR IDEAS.</p></div>
+    <button className="btn btn-ghost" onClick={onDone}>{zh ? '跳过 · Esc' : 'Skip · Esc'}</button>
+  </div>
+}
+
+export function SplashOverlay({ onDone }: { onDone: () => void }): JSX.Element | null {
+  const { config } = useHarness()
+  if (!config || !config.splashEnabled) return null
+  return config.glassEnabled ? <GlassSplash onDone={onDone} /> : <ClassicSplash onDone={onDone} />
 }

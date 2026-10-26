@@ -12,21 +12,23 @@ import { Dashboard } from './pages/Dashboard'
 import { Plugins } from './pages/Plugins'
 import { Settings, type SettingsTab } from './pages/Settings'
 import { Sessions } from './pages/Sessions'
+import { Welcome } from './pages/Welcome'
+import { SIDEBAR_EXPANDED, SIDEBAR_COLLAPSED, GLASS_DEFAULTS, clampAppearance } from '../../shared/appearance'
+import type { CSSProperties } from 'react'
 
-const SIDEBAR_EXPANDED = 212
-const SIDEBAR_COLLAPSED = 56
 
 function Shell(): JSX.Element {
   const { state, config } = useHarness()
   const { state: updateState, overlayOpen, hideOverlay } = useAppUpdate()
   const { t } = useI18n()
   const TITLES: Record<PageId, string> = {
+    home: t('nav.home'),
     dashboard: t('nav.dashboard'),
     sessions: t('nav.sessions'),
     plugins: t('nav.plugins'),
     settings: t('nav.settings')
   }
-  const [view, setView] = useState<PageId | 'dsh'>('dashboard')
+  const [view, setView] = useState<PageId | 'dsh'>('home')
   const [collapsed, setCollapsed] = useState(false)
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('dsh')
   // The startup splash plays inside this window; the DSH view (a native child,
@@ -44,17 +46,14 @@ function Shell(): JSX.Element {
   const prevReady = useRef<boolean | null>(null)
   const freshReady = useRef(false)
 
-  // Auto-switch: once DSH becomes ready, open the embedded view and tuck the
-  // launcher into the sidebar rail. When DSH stops, return to the dashboard.
+  // Keep the welcome page until the user opens DSH. A restarted server needs
+  // a fresh guest document; returning to the launcher must preserve drafts.
   useEffect(() => {
     const was = prevReady.current
     prevReady.current = ready
-    freshReady.current = ready && !was
-    if (ready && !was) {
-      setView('dsh')
-      setCollapsed(true)
-    } else if (!ready && inDsh) {
-      setView('dashboard')
+    if (ready && !was) freshReady.current = true
+    if (!ready && inDsh) {
+      setView('home')
     }
   }, [ready, inDsh])
 
@@ -62,6 +61,7 @@ function Shell(): JSX.Element {
   // reload so a stale page from a previous run isn't shown.
   useEffect(() => {
     api.setDshActive(showDsh, showDsh && freshReady.current)
+    if (showDsh) freshReady.current = false
   }, [showDsh])
 
   // "floatingWhale" (Settings, default off) swaps the collapsed DSH rail for a
@@ -82,7 +82,7 @@ function Shell(): JSX.Element {
     const from = widthAnim.current
     const to = dshWidth
     widthAnim.current = to
-    if (from === to) return
+    if (from === to) { api.setDshSidebarWidth(to); return }
     const DUR = 150
     const t0 = performance.now()
     let raf = 0
@@ -109,10 +109,19 @@ function Shell(): JSX.Element {
     })
   }, [])
 
-  const page = view === 'dsh' ? 'dashboard' : (view as PageId)
+  const page = view === 'dsh' ? 'home' : (view as PageId)
+  const glass = config?.glassEnabled ?? true
+  useEffect(() => { document.documentElement.dataset.glass = String(glass) }, [glass])
+  const appearanceStyle = {
+    '--wallpaper-dim': clampAppearance(config?.wallpaperDim, GLASS_DEFAULTS.wallpaperDim, 15, 75) / 100,
+    '--glass-blur': `${clampAppearance(config?.glassBlur, GLASS_DEFAULTS.glassBlur, 0, 32)}px`
+  } as CSSProperties
+  const openDsh = (): void => { setView('dsh'); setCollapsed(true) }
+  const openAppearance = (): void => { setSettingsTab('system'); setView('settings'); setCollapsed(false) }
 
   return (
-    <div className="flex h-full">
+    <div className="app-shell flex h-full" style={appearanceStyle}>
+      {glass && <div className="app-wallpaper" aria-hidden="true"><img src="./wallpaper.webp" alt="" /><div /></div>}
       {(config?.splashEnabled ?? true) && !splashDone && <SplashOverlay onDone={() => setSplashDone(true)} />}
       {/* Always mounted (width animates to 0 in orb mode) so the rail's content
           can't pop in/out; overflow-hidden on the rail clips it at width 0. */}
@@ -125,11 +134,14 @@ function Shell(): JSX.Element {
         collapsed={collapsed}
         setCollapsed={setCollapsed}
         width={dshWidth}
+        onAppearance={openAppearance}
       />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="app-content flex-1 flex flex-col min-w-0">
         {!inDsh && <TopBar title={TITLES[page]} />}
         <main className={`flex-1 ${inDsh ? 'overflow-hidden' : 'overflow-y-auto'}`}>
-          {inDsh ? null : page === 'dashboard' ? (
+          {inDsh ? null : page === 'home' ? (
+            <Welcome onOpenDsh={openDsh} onSessions={() => setView('sessions')} onAppearance={openAppearance} />
+          ) : page === 'dashboard' ? (
             <Dashboard />
           ) : page === 'sessions' ? (
             <Sessions onOpenDsh={() => { setView('dsh'); setCollapsed(true) }} />

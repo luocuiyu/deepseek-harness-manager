@@ -12,7 +12,8 @@ type Params = Record<string, string | number>
 
 const zh: Record<string, string> = {
   // nav (App / Sidebar)
-  'nav.dsh': 'DSH 界面',
+  'nav.home': '新的探索',
+  'nav.dsh': 'DSH 工作区',
   'nav.dashboard': '控制台',
   'nav.sessions': '会话观察台',
   'nav.plugins': '第三方插件管理',
@@ -283,7 +284,8 @@ const zh: Record<string, string> = {
 }
 
 const en: Record<string, string> = {
-  'nav.dsh': 'DSH View',
+  'nav.home': 'Explore',
+  'nav.dsh': 'DSH workspace',
   'nav.dashboard': 'Dashboard',
   'nav.sessions': 'Sessions',
   'nav.plugins': 'Third-Party Plugin Management',

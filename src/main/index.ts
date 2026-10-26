@@ -1,6 +1,6 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { existsSync, mkdirSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { dirname, isAbsolute, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { bindWindow } from './bus'
 import { getConfig } from './config'
@@ -15,6 +15,16 @@ import { hideToTray, initTray, markQuitting, showLauncher } from './tray'
 import { initUpdater } from './updater'
 
 const here = dirname(fileURLToPath(import.meta.url))
+
+// The packaged smoke test supplies its own profile. Keep OS integration and
+// update prompts out of that isolated test; normal launches use the usual path.
+const smokeProfile = process.env.DSH_MANAGER_SMOKE_PROFILE
+const smokeTest = Boolean(smokeProfile)
+if (smokeProfile) {
+  if (!isAbsolute(smokeProfile)) throw new Error('Smoke profile must be an absolute path')
+  app.setPath('userData', smokeProfile)
+  app.disableHardwareAcceleration()
+}
 
 /**
  * Whale window icon. In dev this resolves under the project root (packaged via
@@ -63,7 +73,7 @@ function createWindow(): BrowserWindow {
   win.on('close', (e) => {
     if (hideToTray()) e.preventDefault()
   })
-  win.on('ready-to-show', () => win.show())
+  win.on('ready-to-show', () => { if (!smokeTest) win.show() })
   win.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url)
     return { action: 'deny' }
@@ -105,7 +115,7 @@ if (!gotTheLock) {
     }
     registerIpc()
     dshStatus.init()
-    ensureShortcuts()
+    if (!smokeTest) ensureShortcuts()
     // autoStartOnLaunch (Settings): start dsh as soon as the app boots, before
     // the window is created, so it boots in parallel with the startup splash —
     // by the time the animation ends, dsh is usually already ready.
@@ -115,8 +125,10 @@ if (!gotTheLock) {
       })
     }
     const win = createWindow()
-    initTray(win)
-    initUpdater()
+    if (!smokeTest) {
+      initTray(win)
+      initUpdater()
+    }
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })

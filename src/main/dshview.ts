@@ -9,8 +9,8 @@
 import { WebContentsView, type BrowserWindow, type WebContents } from 'electron'
 import { getConfig } from './config'
 
-const SIDEBAR_EXPANDED = 212
-const SIDEBAR_COLLAPSED = 56
+import { SIDEBAR_EXPANDED } from '../shared/appearance'
+import { applyDshAppearance } from './dsh-appearance'
 
 let view: WebContentsView | null = null
 let win: BrowserWindow | null = null
@@ -38,7 +38,10 @@ export function setDshActive(next: boolean, reload?: boolean): void {
   active = next
   if (next && (!loaded || reload) && win) {
     loaded = true
-    void ensureView().loadURL(`http://127.0.0.1:${getConfig().port}`)
+    void ensureView().loadURL(`http://127.0.0.1:${getConfig().port}`).catch(() => {
+      loaded = false
+      console.warn('[dsh] Embedded UI could not be loaded.')
+    })
   }
   relayout()
 }
@@ -53,6 +56,11 @@ export function ensureView(): WebContents {
   return ensure().webContents
 }
 
+/** Apply saved appearance changes without reloading or losing a draft. */
+export function refreshDshAppearance(): void {
+  if (view && !view.webContents.isDestroyed()) void applyDshAppearance(view.webContents)
+}
+
 /** Keep the view flush against the sidebar after it expands/collapses. */
 export function setDshSidebarWidth(width: number): void {
   sidebarWidth = width
@@ -64,6 +72,8 @@ function ensure(): WebContentsView {
     view = new WebContentsView({
       webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true }
     })
+    const contents = view.webContents
+    contents.on('did-finish-load', () => void applyDshAppearance(contents))
     win.contentView.addChildView(view)
   }
   return view!

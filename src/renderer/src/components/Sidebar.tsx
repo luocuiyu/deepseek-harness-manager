@@ -17,7 +17,7 @@ import {
 import { StatusPill } from './StatusPill'
 import whaleIcon from '../assets/whale.png'
 
-export type PageId = 'dashboard' | 'sessions' | 'plugins' | 'settings'
+export type PageId = 'home' | 'dashboard' | 'sessions' | 'plugins' | 'settings'
 
 interface SidebarProps {
   view: PageId | 'dsh'
@@ -26,9 +26,10 @@ interface SidebarProps {
   setCollapsed: (b: boolean) => void
   /** Current rail width (0 when the floating orb hides it entirely). */
   width: number
+  onAppearance: () => void
 }
 
-export function Sidebar({ view, setView, collapsed, setCollapsed, width }: SidebarProps): JSX.Element {
+export function Sidebar({ view, setView, collapsed, setCollapsed, width, onAppearance }: SidebarProps): JSX.Element {
   const { state, config, runningTasks } = useHarness()
   const { state: updateState, showOverlay } = useAppUpdate()
   const [theme, toggleTheme] = useTheme()
@@ -42,6 +43,7 @@ export function Sidebar({ view, setView, collapsed, setCollapsed, width }: Sideb
   const showStatus = status === 'error' || status === 'external'
 
   const items: { id: PageId | 'dsh'; label: string; icon: JSX.Element; disabled?: boolean }[] = [
+    { id: 'home', label: t('nav.home'), icon: <PanelIcon /> },
     { id: 'dsh', label: t('nav.dsh'), icon: <PanelIcon />, disabled: !ready },
     { id: 'dashboard', label: t('nav.dashboard'), icon: <TerminalIcon /> },
     { id: 'sessions', label: t('nav.sessions'), icon: <SessionsIcon /> },
@@ -64,7 +66,7 @@ export function Sidebar({ view, setView, collapsed, setCollapsed, width }: Sideb
 
   return (
     <aside
-      className="shrink-0 flex flex-col border-r overflow-hidden transition-[width] duration-150"
+      className="app-sidebar shrink-0 flex flex-col border-r overflow-hidden transition-[width] duration-150"
       style={{
         width,
         borderColor: hidden ? 'transparent' : 'var(--border)',
@@ -87,9 +89,9 @@ export function Sidebar({ view, setView, collapsed, setCollapsed, width }: Sideb
         </button>
         {!collapsed && (
           <div className="min-w-0">
-            <div className="text-[14px] font-semibold leading-tight truncate">DSH Manager</div>
+            <div className="text-[14px] font-semibold leading-tight truncate">DeepSeek</div>
             <div className="text-[11px] leading-tight" style={{ color: 'var(--muted)' }}>
-              DeepSeek Harness
+              Harness Manager
             </div>
           </div>
         )}
@@ -128,6 +130,10 @@ export function Sidebar({ view, setView, collapsed, setCollapsed, width }: Sideb
           )
         })}
       </nav>
+
+      {!collapsed && <button className="sidebar-wallpaper" onClick={onAppearance}>
+        <img src="./wallpaper.webp" alt="" /><span>{lang === 'zh' ? '我的壁纸' : 'My wallpaper'}<small>{lang === 'zh' ? '银蓝 · 自定义' : 'Silver blue · Customize'}</small></span><ChevronIcon dir="right" />
+      </button>}
 
       {showUpdate && (
         <div className="px-2.5 pb-2 shrink-0">

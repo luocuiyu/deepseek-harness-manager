@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { homedir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import type { ApiPreset, LauncherConfig } from '../shared/types'
+import { GLASS_DEFAULTS, DEEPSEEK_MESSAGES_BASE, migrateOfficialPreset, clampAppearance } from '../shared/appearance'
 
 const home = homedir()
 
@@ -14,7 +15,7 @@ const DEFAULT_API_PRESETS: ApiPreset[] = [
   {
     id: 'deepseek-official',
     name: 'DeepSeek 官方',
-    baseUrl: 'https://api.deepseek.com',
+    baseUrl: DEEPSEEK_MESSAGES_BASE,
     balanceUrl: 'https://api.deepseek.com/user/balance',
     apiKey: ''
   },
@@ -54,6 +55,7 @@ function defaults(): LauncherConfig {
     splashEnabled: true,
     autoStartOnLaunch: true,
     floatingWhale: false,
+    ...GLASS_DEFAULTS,
     marketPageSize: 30,
     githubToken: '',
     skippedUpdateVersion: ''
@@ -167,13 +169,13 @@ export function getConfig(): LauncherConfig {
       deepseekApiKey: secrets.deepseekApiKey ?? base.deepseekApiKey,
       githubToken: secrets.githubToken ?? base.githubToken,
       apiPresets: base.apiPresets.map((preset) => ({
-        ...preset,
+        ...migrateOfficialPreset(preset),
         apiKey: secrets.presetKeys?.[preset.id] ?? preset.apiKey
       }))
     }
     // One-time migration from legacy plaintext fields to Windows DPAPI-backed safeStorage.
     const hadPlaintextSecrets = Boolean(parsed.deepseekApiKey || parsed.githubToken || parsed.apiPresets?.some((preset) => preset.apiKey))
-    if ((hadPlaintextSecrets || migratedFromBundled || hadLegacyRuntimeFields) && safeStorage.isEncryptionAvailable()) persist(cache)
+    if ((hadPlaintextSecrets || migratedFromBundled || hadLegacyRuntimeFields || base.apiPresets.some(p => migrateOfficialPreset(p) !== p)) && safeStorage.isEncryptionAvailable()) persist(cache)
   } catch {
     cache = defaults()
   }
@@ -181,7 +183,13 @@ export function getConfig(): LauncherConfig {
 }
 
 export function setConfig(patch: Partial<LauncherConfig>): LauncherConfig {
-  const next = { ...getConfig(), ...patch }
+  const merged = { ...getConfig(), ...patch }
+  const next = {
+    ...merged,
+    glassEnabled: merged.glassEnabled !== false,
+    wallpaperDim: clampAppearance(merged.wallpaperDim, GLASS_DEFAULTS.wallpaperDim, 15, 75),
+    glassBlur: clampAppearance(merged.glassBlur, GLASS_DEFAULTS.glassBlur, 0, 32)
+  }
   cache = next
   try {
     persist(next)

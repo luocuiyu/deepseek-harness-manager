@@ -55,6 +55,12 @@ export interface LauncherConfig {
   autoStartOnLaunch: boolean
   /** DSH view: replace the collapsed whale rail with a draggable floating orb. Default off. */
   floatingWhale: boolean
+  /** Silver-blue wallpaper and glass surfaces, including the embedded DSH view. */
+  glassEnabled: boolean
+  /** Wallpaper shade percentage, 15–75. */
+  wallpaperDim: number
+  /** Backdrop blur in CSS pixels, 0–32. */
+  glassBlur: number
   /** How many plugin-market entries are fetched per page (10–50). */
   marketPageSize: number
   /** Optional GitHub personal access token, used to clone private plugin repos. */
