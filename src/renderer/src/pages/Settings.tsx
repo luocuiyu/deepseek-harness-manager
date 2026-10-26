@@ -367,6 +367,20 @@ export function Settings({ tab, onTabChange }: { tab: SettingsTab; onTabChange: 
 
       {tab === 'system' && (
       <section className="space-y-4">
+        <div className="panel appearance-panel p-5 space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <div><h3 className="section-title">{lang === 'zh' ? '银蓝玻璃' : 'Silver-blue glass'}</h3><p className="text-[12px] mt-1" style={{ color: 'var(--muted)' }}>{lang === 'zh' ? '壁纸与聊天区同步生效，调整后自动保存。' : 'Wallpaper and chat appearance update together. Changes save automatically.'}</p></div>
+            <Toggle checked={form.glassEnabled ?? true} onChange={v => set('glassEnabled')(v)} />
+          </div>
+          <img className="appearance-preview" src="./wallpaper.webp" alt={lang === 'zh' ? '当前银蓝壁纸' : 'Current silver-blue wallpaper'} />
+          <label className="appearance-slider">{lang === 'zh' ? '壁纸遮罩' : 'Wallpaper shade'}<output>{form.wallpaperDim ?? 36}%</output><input aria-label={lang === 'zh' ? '壁纸遮罩' : 'Wallpaper shade'} type="range" min="15" max="75" value={form.wallpaperDim ?? 36} onChange={e => set('wallpaperDim')(Number(e.target.value))} /></label>
+          <label className="appearance-slider">{lang === 'zh' ? '玻璃模糊' : 'Glass blur'}<output>{form.glassBlur ?? 22}px</output><input aria-label={lang === 'zh' ? '玻璃模糊' : 'Glass blur'} type="range" min="0" max="32" value={form.glassBlur ?? 22} onChange={e => set('glassBlur')(Number(e.target.value))} /></label>
+        </div>
+      </section>
+      )}
+
+      {tab === 'system' && (
+      <section className="space-y-4">
         <div className="panel p-5 space-y-5">
           {/* app-level options */}
           <div className="grid sm:grid-cols-2 gap-4">

@@ -27,7 +27,11 @@ export function registerIpc(): void {
   ipcMain.handle('harness:openUi', () => shell.openExternal(`http://127.0.0.1:${getConfig().port}`))
 
   ipcMain.handle('config:get', () => getConfig())
-  ipcMain.handle('config:set', (_e, patch: Partial<typeof getConfig>) => setConfig(patch))
+  ipcMain.handle('config:set', (_e, patch: Parameters<typeof setConfig>[0]) => {
+    const config = setConfig(patch)
+    dshview.refreshDshAppearance()
+    return config
+  })
 
   ipcMain.handle('plugins:list', () => plugins.listPlugins())
   ipcMain.handle('sessions:overview', () => sessions.getSessionOverview())
