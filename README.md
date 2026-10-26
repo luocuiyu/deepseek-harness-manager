@@ -10,13 +10,26 @@
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows)
   ![Electron](https://img.shields.io/badge/Electron-43-47848F?style=flat-square&logo=electron)
 
-  [下载最新版](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest) · [查看 v0.2.3](https://github.com/luocuiyu/deepseek-harness-manager/releases/tag/v0.2.3) · [English](README.en.md) · [提交问题](https://github.com/luocuiyu/deepseek-harness-manager/issues)
+  [下载最新版](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest) · [查看 v0.3.0](https://github.com/luocuiyu/deepseek-harness-manager/releases/tag/v0.3.0) · [English](README.en.md) · [提交问题](https://github.com/luocuiyu/deepseek-harness-manager/issues)
 </div>
 
 > [!IMPORTANT]
 > 本项目是独立社区项目，并非 DeepSeek 官方产品。项目基于 [MarcoG-h/DSH-Launcher](https://github.com/MarcoG-h/DSH-Launcher) 的 MIT 许可代码继续开发，完整归属见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-## v0.2.3 重点更新
+## v0.3.0 银蓝玻璃界面
+
+- 用户选定的静态壁纸、居中欢迎区、紧凑侧栏和底部工作区入口。
+- 管理器与内嵌聊天区使用统一玻璃样式；壁纸遮罩和模糊强度可调整并自动保存。
+- 切换外观不刷新聊天页面，保留正在编写的草稿；原生 DSH 输入、文件和模型功能继续使用。
+- 新增可跳过的壁纸启动画面，支持 Esc 和系统减少动态效果偏好。
+- 修正官方 Messages 默认地址，自动迁移旧版原始官方地址，并保留自定义中转配置。
+- 发布 Windows x64 安装包与自动更新文件。
+
+![v0.3.0 首页（隔离测试环境）](screenshots/v030-home.png)
+
+完整更新记录见 [CHANGELOG.md](CHANGELOG.md)，外观说明见 [docs/silver-blue-ui.md](docs/silver-blue-ui.md)。
+
+## v0.2.3 更新记录
 
 - 点击更新提示中的“下载更新”后，立即唤醒主窗口并显示全局下载进度，不再需要自己寻找软件更新页面。
 - 更新进度卡显示百分比、已下载大小、总大小、实时速度和预计剩余时间，可收起到后台继续下载。
@@ -49,7 +62,7 @@ flowchart LR
 1. 双击桌面的蓝色鲸鱼图标。
 2. 自动检测端口、进程和已有 DSH 实例。
 3. 没有实例时自动启动；已有实例时直接接入，不重复运行第二份。
-4. 端口就绪后，在应用自己的 Electron 窗口中显示 DSH。
+4. 首页显示服务就绪后，点击「进入工作区」，在应用自己的 Electron 窗口中显示 DSH。
 5. 任务栏保留 Manager 自己的图标，不依赖默认浏览器标签页。
 
 ## 真实界面
@@ -92,7 +105,7 @@ DSH 使用 Electron 原生 `WebContentsView` 显示在应用内部，工作区�
 
 | 模块 | 能力 | 说明 |
 | --- | --- | --- |
-| DSH 内嵌界面 | 原生子视图、自动进入、侧边栏联动 | 不打开外部浏览器，保持独立任务栏图标 |
+| DSH 内嵌界面 | 原生子视图、首页进入、侧边栏联动 | 不打开外部浏览器，保持独立任务栏图标 |
 | 进程控制 | 启动、停止、重启、进程树终止 | 避免遗留 Node/DSH 子进程 |
 | 外部实例识别 | 端口探测、PID 查询、自动接入 | 已运行 `npx` 时不会再启动第二份 |
 | 实时日志 | stdout/stderr、自动滚动、任务进度 | 启动失败时可以直接定位错误 |

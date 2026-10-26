@@ -30,3 +30,7 @@ pnpm exec electron tests/desktop-smoke.cjs
 聊天样式以 DSH 0.2.x 的 `--dsw-*` 令牌和描述性 CSS 模块后缀为适配边界，后续 DSH 大改布局时需重新检查。内嵌页面仅在配置的本机 DSH origin 应用主题，无 Node 或管理器 preload。认证、会话接口和运行时版本升级沿用原逻辑，本次未改动。
 
 壁纸由项目所有者提供并选定，仓库使用同图压缩的 WebP 资源。
+
+## 打包后验证
+
+执行 `pnpm dist --x64 --publish never` 后运行 `pnpm test:packaged`，启动 `release/win-unpacked/DeepSeek Harness Manager.exe` 检查实际打包应用。测试通过 `DSH_MANAGER_SMOKE_PROFILE` 提供临时用户目录，该模式隐藏窗口并跳过快捷方式、托盘与更新提示；普通启动不受影响。测试配置关闭自动启动 DSH，使用独立端口。
