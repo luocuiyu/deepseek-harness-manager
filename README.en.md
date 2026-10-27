@@ -1,12 +1,16 @@
-# DeepSeek Harness Manager
+# 大肥鱼 (DaFeiYu)
 
-A Windows desktop control center for DeepSeek Harness. It starts the local DSH service and embeds `http://127.0.0.1:3080/` in its own Electron window, so the taskbar keeps the app's whale icon and no terminal or external browser is required.
+A Windows desktop control center for DeepSeek Harness. It starts the local DSH service and embeds `http://127.0.0.1:3080/` in its own Electron window, so the taskbar keeps the app's character icon and no terminal or external browser is required.
 
 This is an independent community project, not an official DeepSeek product. It is based on [MarcoG-h/DSH-Launcher](https://github.com/MarcoG-h/DSH-Launcher).
 
 Features include an `npx @deepseek-ai/dsh web` default launch mode, Node.js installation guidance, DSH pre-download and validation, embedded DSH, service and tray controls, a read-only session observer, plugin management and provenance, API presets, Windows DPAPI-backed secret storage, and redacted diagnostic exports.
 
 Plugin availability is profile-wide and does not prove a specific session invoked a plugin. The UI labels this distinction explicitly.
+
+## v0.3.2 — 大肥鱼
+
+The product is now named 大肥鱼 (DaFeiYu). A user-supplied character image is used for the installer, executable, shortcuts, tray and UI. The existing application ID, package name, user-data directory and update repository remain stable for upgrades.
 
 ## v0.3.1 — Authentication and responsive layout
 

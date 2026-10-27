@@ -16,6 +16,7 @@ import {
 } from '../lib/icons'
 import { StatusPill } from './StatusPill'
 import whaleIcon from '../assets/whale.png'
+import { APP_NAME } from '../../../shared/brand'
 
 export type PageId = 'home' | 'dashboard' | 'sessions' | 'plugins' | 'settings'
 
@@ -89,9 +90,9 @@ export function Sidebar({ view, setView, collapsed, setCollapsed, width, onAppea
         </button>
         {!collapsed && (
           <div className="min-w-0">
-            <div className="text-[14px] font-semibold leading-tight truncate">DeepSeek</div>
+            <div className="text-[14px] font-semibold leading-tight truncate">{APP_NAME}</div>
             <div className="text-[11px] leading-tight" style={{ color: 'var(--muted)' }}>
-              Harness Manager
+              {lang === 'zh' ? 'DSH 桌面助手' : 'DSH desktop'}
             </div>
           </div>
         )}

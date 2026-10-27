@@ -1,7 +1,7 @@
 {
   "name": "deepseek-harness-manager",
-  "version": "0.3.1",
-  "description": "DeepSeek Harness desktop control center with embedded UI, sessions, plugin provenance, and diagnostics",
+  "version": "0.3.2",
+  "description": "大肥鱼：DeepSeek Harness 桌面助手",
   "main": "./out/main/index.js",
   "author": "lcy",
   "license": "MIT",
@@ -20,12 +20,12 @@
   },
   "build": {
     "appId": "com.community.deepseek-harness-manager",
-    "productName": "DeepSeek Harness Manager",
+    "productName": "大肥鱼",
     "copyright": "Copyright © 2026 lcy",
     "directories": {
       "output": "release"
     },
-    "artifactName": "DeepSeek-Harness-Manager-${version}-Setup.${ext}",
+    "artifactName": "DaFeiYu-${version}-Setup.${ext}",
     "publish": [
       {
         "provider": "github",
@@ -54,7 +54,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "DeepSeek Harness Manager",
+      "shortcutName": "大肥鱼",
       "multiLanguageInstaller": true,
       "installerLanguages": [
         "zh_CN",

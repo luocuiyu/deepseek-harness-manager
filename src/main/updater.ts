@@ -3,6 +3,7 @@ import updaterPackage from 'electron-updater'
 import { broadcast } from './bus'
 import { getConfig, setConfig } from './config'
 import { t } from './i18n'
+import { APP_NAME } from '../shared/brand'
 import { showLauncher } from './tray'
 import type { AppUpdateState } from '../shared/types'
 
@@ -79,7 +80,7 @@ async function promptAvailable(version: string, releaseName?: string | null): Pr
     cancelId: 1,
     noLink: true,
     title: t('发现软件更新', 'Software update available'),
-    message: t(`发现 DeepSeek Harness Manager v${version}`, `DeepSeek Harness Manager v${version} is available`),
+    message: t(`发现 ${APP_NAME} v${version}`, `${APP_NAME} v${version} is available`),
     detail: releaseName || t('可以立即下载,安装前还会再次等待你的确认。', 'You can download now; installation still waits for your confirmation.')
   })
   if (response === 0) {

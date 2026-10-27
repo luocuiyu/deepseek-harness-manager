@@ -6,6 +6,8 @@
 import { createContext, useCallback, useContext, type ReactNode } from 'react'
 import { useHarness } from './hooks/useHarness'
 
+import { APP_NAME } from '../../shared/brand'
+
 export type Lang = 'zh' | 'en'
 
 type Params = Record<string, string | number>
@@ -220,7 +222,7 @@ const zh: Record<string, string> = {
   'presets.destroyConfirm': '永久删除“{name}”?\n\n该操作会彻底清除文件,无法恢复。',
   'presets.destroyFailed': '永久删除代理预设失败。',
   // app updates
-  'updates.title': 'DeepSeek Harness Manager 更新',
+  'updates.title': `${APP_NAME} 更新`,
   'updates.description': '从 GitHub Releases 检查正式版本。发现更新后由你确认下载,下载完成后再确认重启安装,不会静默强制更新。',
   'updates.loading': '正在读取更新状态…',
   'updates.ready': '可以检查新版本',
@@ -484,7 +486,7 @@ const en: Record<string, string> = {
   'presets.destroyConfirm': 'Permanently delete “{name}”?\n\nThis removes the files completely and cannot be undone.',
   'presets.destroyFailed': 'Failed to permanently delete the agent preset.',
   // app updates
-  'updates.title': 'DeepSeek Harness Manager Update',
+  'updates.title': `${APP_NAME} Update`,
   'updates.description': 'Checks stable GitHub Releases. You choose when to download and confirm again before restarting to install; updates are never forced silently.',
   'updates.loading': 'Reading update state…',
   'updates.ready': 'Ready to check for updates',

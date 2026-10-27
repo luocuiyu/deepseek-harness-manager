@@ -13,8 +13,14 @@ import { ensureShortcuts } from './shortcuts'
 import { preloadPath } from './preload'
 import { hideToTray, initTray, markQuitting, showLauncher } from './tray'
 import { initUpdater } from './updater'
+import { APP_NAME } from '../shared/brand'
 
 const here = dirname(fileURLToPath(import.meta.url))
+
+// Renaming the product must not move existing settings, secrets or cookies.
+const existingUserData = app.getPath('userData')
+app.setName(APP_NAME)
+app.setPath('userData', existingUserData)
 
 // The packaged smoke test supplies its own profile. Keep OS integration and
 // update prompts out of that isolated test; normal launches use the usual path.
@@ -27,13 +33,13 @@ if (smokeProfile) {
 }
 
 /**
- * Whale window icon. In dev this resolves under the project root (packaged via
+ * Application window icon. In dev this resolves under the project root (packaged via
  * `extraResources` to `<install>/resources/icon.png`); in the packaged app the
  * `process.resourcesPath` copy wins. Missing file ⇒ undefined ⇒ Windows uses
  * the exe icon (also the whale), so this never breaks anything.
  */
 function appIconPath(): string | undefined {
-  for (const p of [join(process.resourcesPath, 'icon.png'), join(app.getAppPath(), 'resources', 'icon.png')]) {
+  for (const p of [join(process.resourcesPath, 'resources', 'icon.png'), join(process.resourcesPath, 'icon.png'), join(app.getAppPath(), 'resources', 'icon.png')]) {
     if (existsSync(p)) return p
   }
   return undefined
@@ -45,7 +51,7 @@ function createWindow(): BrowserWindow {
     height: 760,
     minWidth: 960,
     minHeight: 620,
-    title: 'DeepSeek Harness Manager',
+    title: APP_NAME,
     backgroundColor: '#0e1013',
     icon: appIconPath(),
     show: false,

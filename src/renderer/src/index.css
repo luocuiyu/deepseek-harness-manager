@@ -398,3 +398,5 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outlin
   .welcome-bottom { max-width: 840px; }
 }
 @media (max-width: 1050px) { .session-columns { grid-template-columns: minmax(0, 1fr); } }
+
+.brand-splash-icon { width: 88px; height: 88px; object-fit: contain; border-radius: 22px; margin-bottom: 18px; box-shadow: 0 10px 36px rgba(15, 25, 50, .2); }
