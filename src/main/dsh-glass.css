@@ -5,16 +5,21 @@
   color-scheme: dark;
   --dsw-alias-bg-base: transparent !important;
   --dsw-alias-bg-layer-1: rgba(46, 55, 76, .82) !important;
-  --dsw-alias-bg-layer-2: rgba(57, 67, 89, .88) !important;
+  --dsw-alias-bg-layer-2: rgba(43, 56, 79, .96) !important;
   --dsw-alias-bg-layer-3: #3e4961 !important;
   --dsw-alias-bg-module-platform: rgba(57, 67, 89, .78) !important;
-  --dsw-specific-sidebar-fill: rgba(42, 51, 72, .64) !important;
-  --dsw-specific-input-major: rgba(53, 64, 91, .68) !important;
+  --dsw-specific-sidebar-fill: rgba(42, 51, 72, .92) !important;
+  --dsw-specific-input-major: rgba(47, 63, 90, .96) !important;
   --dsw-specific-menu: rgba(43, 52, 73, .96) !important;
+  --dsw-specific-bubble: #425471 !important;
+  --dsw-alias-markdown-code-block: #19263c !important;
+  --dsw-alias-markdown-code-block-banner: #2e405d !important;
+  --dsw-alias-markdown-inline-code: #425471 !important;
+  --dsw-alias-link: #c6dcff !important;
   --dsw-alias-label-primary: #f1f4fd !important;
   --dsw-alias-label-secondary: #d7dfef !important;
-  --dsw-alias-label-tertiary: #bac6db !important;
-  --dsw-alias-label-caption: #b5c3dc !important;
+  --dsw-alias-label-tertiary: #cfdaec !important;
+  --dsw-alias-label-caption: #c3d0e6 !important;
   --dsw-alias-label-primary-foreground: #24324e !important;
   --dsw-alias-label-primary-bluish: #e4edff !important;
   --dsw-alias-brand-primary: #c8dcff !important;
@@ -35,7 +40,7 @@ html { background: #303b54 !important; }
 body {
   background: linear-gradient(rgba(25, 34, 55, var(--manager-dim)), rgba(25, 34, 55, var(--manager-dim))), var(--manager-wallpaper) 36% center / cover fixed !important;
 }
-/* Glass is limited to the frame sidebar and actual composer surface. */
+/* Native controls and editors keep their DOM and event handlers. */
 [class*="_sidebarCol"] { backdrop-filter: blur(var(--manager-blur)); }
 [class*="_composerStack"] [class*="_card"]:has([contenteditable]),
 [class*="_composerStack"] [class*="_cardWorkspaceTrigger"] {
@@ -48,11 +53,83 @@ body {
 [data-phase="hero"] [class*="_scrollBody"] { justify-content: flex-end !important; }
 [data-phase="hero"] [class*="_composerHero"] { padding-bottom: 24px !important; }
 [data-phase="hero"] [class*="_composerHero"] [class*="_heading"] { text-align: center; }
-/* Transcript readability takes priority once a conversation has content. */
-[data-phase="active"] [class*="_viewArea"] {
-  background: rgba(30, 39, 58, .78);
-  border-radius: 16px;
+/* The wall remains visible around a bounded reading column, not through text. */
+:is([data-phase="active"], [data-content-phase="active"]) [class*="_viewArea"] {
+  background: transparent !important;
+}
+:is([data-phase="active"], [data-content-phase="active"]) [class*="_viewArea"] [class*="_scroll"] > [class*="_column"] {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(var(--dsh-chat-content-width, 920px) + 32px);
+  margin: 8px auto 16px;
+  padding: clamp(16px, 2vw, 28px);
+  background: rgba(35, 48, 72, .84);
+  border: 1px solid rgba(220, 233, 255, .16);
+  border-radius: 22px;
+  backdrop-filter: blur(var(--manager-blur)) saturate(112%);
+  box-shadow: 0 14px 44px rgba(26, 38, 60, .16);
+}
+:is([data-phase="active"], [data-content-phase="active"]) > [class*="_header"]:not([class*="_headerBlank"]) {
+  background: rgba(34, 47, 70, .93);
+  backdrop-filter: blur(var(--manager-blur));
+}
+.md-code-block {
+  --dsl-code-block-background: #19263c !important;
+  --dsl-code-block-banner-background-color: #2e405d !important;
+  border: 1px solid rgba(153, 178, 217, .25);
+}
+/* Plugin Manager: descriptive suffixes scoped by its actual page structure. */
+[class*="_page"]:has(> :is([class*="_group"], [class*="_installedPanel"])) {
+  gap: 22px !important;
+  padding-top: 24px !important;
+}
+[class*="_page"]:has(> :is([class*="_group"], [class*="_installedPanel"])) > [class*="_pageHead"] {
+  padding: 20px 24px !important;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 18px;
+  background: rgba(31, 43, 65, .91);
+  backdrop-filter: blur(var(--manager-blur));
+}
+[class*="_page"] [class*="_group"] > [class*="_groupHead"] {
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 9px;
+  background: rgba(34, 47, 70, .91);
+}
+[class*="_page"] [class*="_group"] > :is([class*="_cards"], [class*="_rows"]) {
+  box-sizing: border-box;
+  gap: 0 !important;
+  border: 1px solid rgba(213, 229, 255, .18);
+  border-radius: 18px;
+  background: rgba(33, 46, 69, .84);
+  backdrop-filter: blur(var(--manager-blur)) saturate(112%);
+  box-shadow: 0 12px 36px rgba(24, 36, 61, .13);
+}
+[class*="_page"] [class*="_group"] > [class*="_cards"] > [class*="_card"] {
+  margin: 0 !important;
+  border-radius: 0;
+}
+[class*="_page"] [class*="_group"] > [class*="_cards"] > [class*="_card"] + [class*="_card"] {
+  border-top: 1px solid var(--dsw-alias-border-l1);
+}
+[class*="_page"] [class*="_group"] [class*="_cardHead"] {
+  padding: 14px 18px;
+}
+/* The task calendar/list is another page whose native base is transparent. */
+[class*="_page"]:has(> [class*="_listPane"]) {
+  background: rgba(33, 46, 69, .94) !important;
 }
 @media (max-width: 720px) {
   [data-phase="hero"] [class*="_composerHero"] { padding-bottom: 12px !important; }
+}
+
+/* Some DSH profiles wrap plugin groups in installedPanel (including empty states). */
+[class*="_page"] > [class*="_installedPanel"] > :is([class*="_empty"], [class*="_status"], [class*="_failure"]) {
+  padding: 20px 24px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 18px;
+  background: rgba(33, 46, 69, .94);
 }

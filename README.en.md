@@ -8,6 +8,13 @@ Features include an `npx @deepseek-ai/dsh web` default launch mode, Node.js inst
 
 Plugin availability is profile-wide and does not prove a specific session invoked a plugin. The UI labels this distinction explicitly.
 
+## v0.3.3 — Startup and readability
+
+- Five-second, text-free startup film with skip, Escape, reduced-motion handling and playback failure recovery.
+- Static wallpaper on the home screen.
+- Blue-gray reading surfaces for embedded plugin descriptions and conversation content, with coordinated code blocks and composer.
+- Higher contrast for manager settings, session and plugin pages, and embedded menus.
+
 ## v0.3.2 — 大肥鱼
 
 The product is now named 大肥鱼 (DaFeiYu). A user-supplied character image is used for the installer, executable, shortcuts, tray and UI. The existing application ID, package name, user-data directory and update repository remain stable for upgrades.

@@ -73,6 +73,9 @@ async function main() {
   assert.equal(app.getPath('userData'), profile, 'Renaming must preserve the chosen user-data directory')
   await waitFor(() => js('Boolean(window.dshLauncher && document.querySelector(".welcome-hero"))'), 'welcome page')
   await waitFor(() => js('Boolean(document.querySelector(".glass-splash"))'), 'wallpaper startup splash')
+  await waitFor(() => js('document.querySelector(".glass-splash-video")?.duration === 5'), 'five-second local startup film')
+  assert.equal(await js('document.querySelector(".glass-splash").textContent.trim()'), '跳过 · Esc')
+  assert.equal(await js('document.querySelectorAll(".app-wallpaper video").length'), 0, 'Homepage stays static')
   await js('window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }))')
   await waitFor(() => js('!document.querySelector(".glass-splash")'), 'Escape skips splash')
   assert.equal(await js('document.title'), '大肥鱼')
@@ -144,6 +147,30 @@ async function main() {
   await waitFor(() => guestJs('getComputedStyle(document.body).backgroundImage.includes("data:image/webp")'), 'guest theme reapplied')
   assert.equal(await guestJs('document.querySelector("[contenteditable]").textContent'), '中文草稿保持不变')
   assert.equal(await guestJs('getComputedStyle(document.querySelector(".uV2eYG_card")).backdropFilter.includes("12px")'), true)
+  // Exercise a content-filled native layout without calling a model or changing a user session.
+  await guestJs(`(() => {
+    const root = document.querySelector('[data-phase]'); root.dataset.phase = 'active';
+    const sheet = document.createElement('style');
+    sheet.textContent = '.fixture_viewArea{flex:1;min-width:0}.fixture_scroll{padding:16px 24px}.fixture_column{color:var(--dsw-alias-label-primary)}.md-code-block{background:var(--dsw-alias-markdown-code-block)}.md-code-block pre{max-width:100%;overflow:auto}';
+    document.head.append(sheet);
+    const view = document.createElement('div'); view.className = 'fixture_viewArea';
+    view.innerHTML = '<div class="fixture_scroll"><div class="fixture_column"><p>中文正文与壁纸分离</p><div class="md-code-block"><pre>const result = &quot;' + 'long-code-'.repeat(150) + '&quot;;</pre></div></div></div>';
+    root.prepend(view);
+  })()`)
+  const reading = await guestJs(`(() => {
+    const q = s => document.querySelector(s), column = q('.fixture_column'), card = getComputedStyle(column);
+    const r = column.getBoundingClientRect(), area = q('.fixture_viewArea').getBoundingClientRect();
+    return { background: card.backgroundColor, blur: card.backdropFilter, radius: card.borderRadius,
+      center: Math.abs(r.left+r.width/2-area.left-area.width/2), inset:r.left-area.left,
+      outer: getComputedStyle(q('.fixture_viewArea')).backgroundColor,
+      code: getComputedStyle(q('.md-code-block')).backgroundColor, overflow:document.documentElement.scrollWidth>innerWidth };
+  })()`)
+  assert.equal(reading.background, 'rgba(35, 48, 72, 0.84)')
+  assert.equal(reading.outer, 'rgba(0, 0, 0, 0)')
+  assert.equal(reading.code, 'rgb(25, 38, 60)')
+  assert.ok(reading.center < 2 && reading.inset >= 20 && reading.blur.includes('12px'), JSON.stringify(reading))
+  assert.equal(reading.overflow, false)
+  assert.equal(await guestJs('document.querySelector("[contenteditable]").textContent'), '中文草稿保持不变')
   win.webContents.setZoomFactor(1.25)
   await win.webContents.capturePage(undefined, { stayHidden: true, stayAwake: true })
   await new Promise(resolve => setTimeout(resolve, 250))

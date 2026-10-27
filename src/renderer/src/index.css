@@ -313,16 +313,16 @@ body {
 
 /* Silver-blue glass shell. The image stays sharp; only foreground panels blur. */
 :root[data-glass="true"] {
-  --bg: #333e56; --bg-soft: rgba(38, 48, 70, .66);
-  --panel: rgba(47, 58, 81, .68); --card: rgba(50, 62, 86, .76);
+  --bg: #333e56; --bg-soft: rgba(38, 48, 70, .94);
+  --panel: rgba(33, 46, 69, .90); --card: rgba(35, 48, 72, .90);
   --card-hover: rgba(77, 92, 121, .8); --border: rgba(222, 233, 255, .18);
-  --border-strong: rgba(222, 233, 255, .38); --text: #f0f4ff; --muted: #c0cbdf;
+  --border-strong: rgba(222, 233, 255, .38); --text: #f3f6fd; --muted: #cfdaec;
   --accent: #c9dcff; --accent-soft: rgba(204, 222, 255, .14);
 }
 :root[data-glass="true"][data-theme="light"] {
-  --bg: #b8c2d5; --bg-soft: rgba(237, 242, 255, .78); --panel: rgba(223, 231, 246, .76);
-  --card: rgba(236, 241, 253, .82); --card-hover: rgba(250, 252, 255, .92);
-  --text: #26334c; --muted: #4e5e79; --border: rgba(63, 83, 119, .2);
+  --bg: #b8c2d5; --bg-soft: rgba(237, 242, 255, .96); --panel: rgba(230, 237, 250, .94);
+  --card: rgba(236, 241, 253, .94); --card-hover: rgba(250, 252, 255, .92);
+  --text: #26334c; --muted: #3e506d; --border: rgba(63, 83, 119, .2);
   --border-strong: rgba(63, 83, 119, .4); --accent: #345e99; --accent-soft: rgba(52, 94, 153, .12);
 }
 button { cursor: pointer; }
@@ -373,14 +373,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outlin
 @media (max-width: 1050px) { .welcome-page { padding-inline: 24px; } .welcome-hero h1 { font-size: 30px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
-.glass-splash { position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center; background-color: #303d56; background-position: center; background-size: cover; }
-.glass-splash-brand { display: flex; flex-direction: column; align-items: center; color: #eff5ff; animation: glass-reveal 1s ease both; text-shadow: 0 3px 30px rgba(10, 22, 43, .35); }
-.glass-splash-brand > span { font-size: 42px; font-weight: 600; letter-spacing: -.04em; }
-.glass-splash-brand > small { font-size: 11px; letter-spacing: .3em; margin-top: 6px; }
-.glass-splash-brand > i { width: 60px; height: 1px; margin: 28px 0; background: #d5e6ff; opacity: .6; }
-.glass-splash-brand > p { font-size: 10px; letter-spacing: .2em; opacity: .8; }
-.glass-splash > button { position: absolute; bottom: 26px; right: 28px; color: white; border-color: rgba(255,255,255,.3); background: rgba(40, 53, 80, .4); }
-@keyframes glass-reveal { from { opacity: 0; transform: translateY(8px); filter: blur(5px); } to { opacity: 1; transform: none; filter: none; } }
+.glass-splash { position: fixed; inset: 0; z-index: 9999; overflow: hidden; background: #303d56 url("/wallpaper.webp") center / cover; }
+.glass-splash-video { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.glass-splash > button { position: absolute; bottom: 26px; right: 28px; color: #f3f6fd; border-color: rgba(225,238,255,.4); background: rgba(33,46,69,.94); }
 
 /* Page width follows the available work area rather than sticking to its left. */
 .content-page { box-sizing: border-box; width: 100%; max-width: 1480px; margin-inline: auto; padding: clamp(20px, 2.4vw, 40px); }
@@ -399,4 +394,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outlin
 }
 @media (max-width: 1050px) { .session-columns { grid-template-columns: minmax(0, 1fr); } }
 
-.brand-splash-icon { width: 88px; height: 88px; object-fit: contain; border-radius: 22px; margin-bottom: 18px; box-shadow: 0 10px 36px rgba(15, 25, 50, .2); }
+
+
+/* Give headings and secondary tabs a stable reading surface on bright wallpaper. */
+[data-glass="true"] .content-page { background: var(--panel); backdrop-filter: blur(var(--glass-blur, 22px)); border-radius: 20px; }
