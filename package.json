@@ -1,6 +1,6 @@
 {
   "name": "deepseek-harness-manager",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "大肥鱼：DeepSeek Harness 桌面助手",
   "main": "./out/main/index.js",
   "author": "lcy",

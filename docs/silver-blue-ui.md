@@ -4,7 +4,7 @@
 
 - 「我的壁纸」或首页「外观」打开系统设置；玻璃开关、壁纸遮罩（15–75%）和模糊（0–32px）自动保存。
 - 聊天区仍由原生 WebContentsView 承载，保留 DSH 自己的输入框、文件和模型功能。主题切换只更新 CSS，不重载页面或清空草稿。
-- 首次启动显示 2.8 秒壁纸引导，可用 Esc 或跳过按钮立即关闭；系统减少动态效果时立即结束。关闭玻璃模式后仍使用原启动动画。
+- 启动时播放已确认的 5 秒无字短片，可用 Esc 或跳过按钮立即关闭；系统减少动态效果时立即结束。玻璃和经典模式共用同一短片；主页始终使用静态壁纸。
 - 首页的「继续项目」进入真实会话观察台；会话选择与继续操作遵循现有 DSH 功能。DSH 就绪后首页保持显示，由用户进入工作区。
 
 ## 兼容修复
@@ -33,8 +33,14 @@ pnpm exec electron tests/desktop-smoke.cjs
 
 ## 打包后验证
 
-执行 `pnpm dist --x64 --publish never` 后运行 `pnpm test:packaged`，启动 `release/win-unpacked/DeepSeek Harness Manager.exe` 检查实际打包应用。测试通过 `DSH_MANAGER_SMOKE_PROFILE` 提供临时用户目录，该模式隐藏窗口并跳过快捷方式、托盘与更新提示；普通启动不受影响。测试配置关闭自动启动 DSH，使用独立端口。
+执行 `pnpm dist --x64 --publish never` 后运行 `pnpm test:packaged`，启动 `release/win-unpacked/大肥鱼.exe` 检查实际打包应用。测试通过 `DSH_MANAGER_SMOKE_PROFILE` 提供临时用户目录，该模式隐藏窗口并跳过快捷方式、托盘与更新提示；普通启动不受影响。测试配置关闭自动启动 DSH，使用独立端口。
 
 ## 真实 DSH 连接验证
 
 将 `DSH_REAL_CLI` 指向已安装的 `@deepseek-ai/dsh/lib/bin.js`，可选设置 `DSH_NODE_PATH`，然后执行 `pnpm test:real-dsh`。测试通过 Manager 启动真实 DSH web，使用独立 DSH_HOME 和端口，检查 `--no-open`、启动链接脱敏、HttpOnly Cookie 和实际工作区页面。测试不调用模型，也不改动用户正在运行的 DSH。
+
+## v0.3.3 阅读面板
+
+内嵌插件页的分组列表和页面标题增加独立底色，聊天正文使用有边距的居中面板，壁纸保留在阅读区域四周。代码块、行内代码、输入框和菜单使用统一的蓝灰色，浅色说明文字不再直接覆盖亮色壁纸。管理器内容页也增加稳定背景，支持深浅主题。
+
+启动素材是根据项目所有者提供并确认的角色壁纸制作的分层微动视频；部分人物和纸带细节由图像模型重新绘制。视频本地播放，无音轨，不调用在线生成服务。原生 DSH 页面仍由 CSS 适配，不替换其 DOM、编辑器或插件操作。

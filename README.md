@@ -10,11 +10,18 @@
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows)
   ![Electron](https://img.shields.io/badge/Electron-43-47848F?style=flat-square&logo=electron)
 
-  [下载最新版](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest) · [查看 v0.3.2](https://github.com/luocuiyu/deepseek-harness-manager/releases/tag/v0.3.2) · [English](README.en.md) · [提交问题](https://github.com/luocuiyu/deepseek-harness-manager/issues)
+  [下载最新版](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest) · [查看 v0.3.3](https://github.com/luocuiyu/deepseek-harness-manager/releases/tag/v0.3.3) · [English](README.en.md) · [提交问题](https://github.com/luocuiyu/deepseek-harness-manager/issues)
 </div>
 
 > [!IMPORTANT]
 > 本项目是独立社区项目，并非 DeepSeek 官方产品。项目基于 [MarcoG-h/DSH-Launcher](https://github.com/MarcoG-h/DSH-Launcher) 的 MIT 许可代码继续开发，完整归属见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+## v0.3.3 阅读与启动更新
+
+- 5 秒无字启动动画，支持跳过、Esc 和减少动态效果；主页保持静态壁纸。
+- 插件页增加分组阅读底色，说明文字与开关更清楚。
+- 对话区收为独立阅读面板，代码块和输入区统一蓝灰配色。
+- 提高设置、插件、会话、菜单等页面的文字对比度。
 
 ## v0.3.2 大肥鱼
 
