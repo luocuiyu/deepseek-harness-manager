@@ -65,7 +65,7 @@ export function Dashboard(): JSX.Element {
   }
 
   return (
-    <div className="p-5 space-y-5">
+    <div className="content-page dashboard-page space-y-5">
       {/* Status hero */}
       <div className="panel p-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">

@@ -7,6 +7,7 @@ const api: DshLauncherApi = {
   stop: () => ipcRenderer.invoke('harness:stop'),
   restart: () => ipcRenderer.invoke('harness:restart'),
   openUi: () => ipcRenderer.invoke('harness:openUi'),
+  connectDsh: (url) => ipcRenderer.invoke('dsh:connect', url),
   getConfig: () => ipcRenderer.invoke('config:get'),
   setConfig: (patch) => ipcRenderer.invoke('config:set', patch),
   listPlugins: () => ipcRenderer.invoke('plugins:list'),

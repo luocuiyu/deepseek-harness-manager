@@ -10,11 +10,21 @@
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows)
   ![Electron](https://img.shields.io/badge/Electron-43-47848F?style=flat-square&logo=electron)
 
-  [下载最新版](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest) · [查看 v0.3.0](https://github.com/luocuiyu/deepseek-harness-manager/releases/tag/v0.3.0) · [English](README.en.md) · [提交问题](https://github.com/luocuiyu/deepseek-harness-manager/issues)
+  [下载最新版](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest) · [查看 v0.3.1](https://github.com/luocuiyu/deepseek-harness-manager/releases/tag/v0.3.1) · [English](README.en.md) · [提交问题](https://github.com/luocuiyu/deepseek-harness-manager/issues)
 </div>
 
 > [!IMPORTANT]
 > 本项目是独立社区项目，并非 DeepSeek 官方产品。项目基于 [MarcoG-h/DSH-Launcher](https://github.com/MarcoG-h/DSH-Launcher) 的 MIT 许可代码继续开发，完整归属见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+## v0.3.1 修复更新
+
+- 修复进入工作区显示 `dsh web authentication required`：自动使用真实启动链接完成本机认证。
+- 启动 DSH 时不再自动打开系统浏览器，配置端口同时生效。
+- 宽屏页面居中扩展，设置部署区域双栏显示；小窗口和缩放保持适配。
+- 外部 DSH 实例可在软件内粘贴启动链接连接，令牌不写入日志或配置。
+- 已使用真实 DSH 服务完成认证、Cookie 和实际工作区页面测试。
+
+![v0.3.1 宽屏设置（隔离测试环境）](screenshots/v031-settings.png)
 
 ## v0.3.0 银蓝玻璃界面
 

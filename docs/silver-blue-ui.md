@@ -27,10 +27,14 @@ pnpm exec electron tests/desktop-smoke.cjs
 
 桌面测试使用临时配置及随机本地端口的布局夹具，验证 1180/960 宽度、启动跳过、外观持久化、官方地址迁移、内嵌页面隔离、切换样式与中文草稿保留。不会启动或停止用户正在运行的 DSH 服务，也不会调用模型。截图默认写入 `out/smoke/`；可用 `SMOKE_OUTPUT` 指定目录。
 
-聊天样式以 DSH 0.2.x 的 `--dsw-*` 令牌和描述性 CSS 模块后缀为适配边界，后续 DSH 大改布局时需重新检查。内嵌页面仅在配置的本机 DSH origin 应用主题，无 Node 或管理器 preload。认证、会话接口和运行时版本升级沿用原逻辑，本次未改动。
+聊天样式以 DSH 0.2.x 的 `--dsw-*` 令牌和描述性 CSS 模块后缀为适配边界，后续 DSH 大改布局时需重新检查。内嵌页面仅在配置的本机 DSH origin 应用主题，无 Node 或管理器 preload。工作区使用启动链接交换 HttpOnly 认证 Cookie，启动令牌只留在主进程内存，日志会脱敏。未认证的外部实例可粘贴其本机启动链接连接；会话接口和运行时安装规则保持原逻辑。
 
 壁纸由项目所有者提供并选定，仓库使用同图压缩的 WebP 资源。
 
 ## 打包后验证
 
 执行 `pnpm dist --x64 --publish never` 后运行 `pnpm test:packaged`，启动 `release/win-unpacked/DeepSeek Harness Manager.exe` 检查实际打包应用。测试通过 `DSH_MANAGER_SMOKE_PROFILE` 提供临时用户目录，该模式隐藏窗口并跳过快捷方式、托盘与更新提示；普通启动不受影响。测试配置关闭自动启动 DSH，使用独立端口。
+
+## 真实 DSH 连接验证
+
+将 `DSH_REAL_CLI` 指向已安装的 `@deepseek-ai/dsh/lib/bin.js`，可选设置 `DSH_NODE_PATH`，然后执行 `pnpm test:real-dsh`。测试通过 Manager 启动真实 DSH web，使用独立 DSH_HOME 和端口，检查 `--no-open`、启动链接脱敏、HttpOnly Cookie 和实际工作区页面。测试不调用模型，也不改动用户正在运行的 DSH。

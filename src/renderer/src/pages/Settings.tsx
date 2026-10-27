@@ -137,7 +137,7 @@ export function Settings({ tab, onTabChange }: { tab: SettingsTab; onTabChange: 
   const prepareTask = tasks['dsh:prepare']
 
   return (
-    <div className="p-5 space-y-5 max-w-[900px]">
+    <div className="content-page settings-page space-y-5">
       <h2 className="text-[18px] font-semibold">{t('settings.title')}</h2>
 
       {/* tab bar — click to jump straight to the section */}
@@ -158,7 +158,7 @@ export function Settings({ tab, onTabChange }: { tab: SettingsTab; onTabChange: 
       </div>
 
       {tab === 'dsh' && (
-      <section className="space-y-4">
+      <section className="settings-deployment space-y-4">
         {/* Step 1: system Node.js environment */}
         <div className="panel p-5 space-y-4">
           <div className="flex items-start justify-between gap-4 flex-wrap">

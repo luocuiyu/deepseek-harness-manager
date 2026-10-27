@@ -34,6 +34,12 @@ function Shell(): JSX.Element {
   // The startup splash plays inside this window; the DSH view (a native child,
   // drawn above the DOM) stays hidden until the splash has finished.
   const [splashDone, setSplashDone] = useState(false)
+  const [authRequired, setAuthRequired] = useState(false)
+  useEffect(() => api.onEvent(event => {
+    if (event.type !== 'dsh-auth') return
+    setAuthRequired(event.required)
+    if (event.required) { setView('home'); setCollapsed(false) }
+  }), [])
 
   // The embedded DSH view may only open once the port actually reports ready —
   // not while 'starting'/'stopping' (a connection would just fail).
@@ -96,6 +102,12 @@ function Shell(): JSX.Element {
     return () => cancelAnimationFrame(raf)
   }, [dshWidth])
 
+  useEffect(() => {
+    const syncWidth = (): void => api.setDshSidebarWidth(dshWidth)
+    window.addEventListener('resize', syncWidth)
+    return () => window.removeEventListener('resize', syncWidth)
+  }, [dshWidth])
+
   // Show the floating orb while the DSH view is open in orb mode.
   useEffect(() => {
     api.setOrbVisible(orbMode && !updateOverlayActive)
@@ -140,7 +152,7 @@ function Shell(): JSX.Element {
         {!inDsh && <TopBar title={TITLES[page]} />}
         <main className={`flex-1 ${inDsh ? 'overflow-hidden' : 'overflow-y-auto'}`}>
           {inDsh ? null : page === 'home' ? (
-            <Welcome onOpenDsh={openDsh} onSessions={() => setView('sessions')} onAppearance={openAppearance} />
+            <Welcome authRequired={authRequired} onConnected={() => { setAuthRequired(false); openDsh() }} onOpenDsh={openDsh} onSessions={() => setView('sessions')} onAppearance={openAppearance} />
           ) : page === 'dashboard' ? (
             <Dashboard />
           ) : page === 'sessions' ? (

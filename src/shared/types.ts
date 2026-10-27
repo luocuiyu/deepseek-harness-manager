@@ -219,6 +219,7 @@ export interface TaskEvent {
 }
 
 export type LauncherEvent =
+  | { type: 'dsh-auth'; required: boolean }
   | { type: 'state'; state: HarnessState }
   | { type: 'log'; stream: 'stdout' | 'stderr'; line: string; at: number }
   | { type: 'task'; task: TaskEvent }
@@ -304,6 +305,7 @@ export interface DshLauncherApi {
   stop(): Promise<void>
   restart(): Promise<CmdResult>
   openUi(): Promise<void>
+  connectDsh(url: string): Promise<CmdResult>
   getConfig(): Promise<LauncherConfig>
   setConfig(patch: Partial<LauncherConfig>): Promise<LauncherConfig>
   listPlugins(): Promise<PluginListResult>

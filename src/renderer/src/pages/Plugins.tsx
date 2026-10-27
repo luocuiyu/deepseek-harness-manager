@@ -79,7 +79,7 @@ export function Plugins(): JSX.Element {
   const local = data?.local ?? []
 
   return (
-    <div className="p-5 space-y-5 max-w-[1000px]">
+    <div className="content-page plugins-page space-y-5">
       <div className="flex items-center gap-2">
         <h2 className="text-[18px] font-semibold">{t('plugins.title')}</h2>
         <span className="badge" style={{ color: 'var(--muted)', background: 'var(--bg-soft)' }}>

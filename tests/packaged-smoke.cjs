@@ -54,12 +54,24 @@ async function inspect(target) {
 
 async function main() {
   assert.equal(fs.existsSync(exe), true, 'Build the Windows package first')
-  fixture = http.createServer((_req, res) => {
+  const authToken = 'packaged-fixture-test-token'
+  let authExchanges = 0
+  fixture = http.createServer((req, res) => {
+    const url = new URL(req.url, 'http://127.0.0.1')
+    if (url.searchParams.get('token') === authToken) {
+      authExchanges++
+      res.writeHead(303, { location: './', 'set-cookie': 'test-auth=ok; HttpOnly; Path=/; SameSite=Strict' })
+      res.end(); return
+    }
+    if (!req.headers.cookie?.includes('test-auth=ok')) {
+      res.writeHead(401); res.end('dsh web authentication required; reopen the URL printed by dsh web.'); return
+    }
     res.setHeader('content-type', 'text/html; charset=utf-8')
     res.end('<!doctype html><html><body><main class="test_root" data-phase="hero"><div class="test_composerStack"><div class="test_card"><div role="textbox" contenteditable="true">打包后中文草稿</div></div></div></main></body></html>')
   })
   await new Promise(resolve => fixture.listen(0, '127.0.0.1', resolve))
   const port = fixture.address().port
+  assert.equal((await fetch(`http://127.0.0.1:${port}`)).status, 401)
   const reserve = http.createServer()
   await new Promise(resolve => reserve.listen(0, '127.0.0.1', resolve))
   const inspectorPort = reserve.address().port
@@ -90,11 +102,14 @@ async function main() {
   assert.equal(await js('document.querySelector(".welcome-hero h1").textContent'), '探索未至之境')
   assert.equal((await js('window.dshLauncher.getConfig()')).apiPresets[0].baseUrl, 'https://api.deepseek.com/anthropic')
   await waitFor(() => js('window.dshLauncher.getState().then(b => b.state.ready)'), 'fixture ready')
+  assert.equal((await js(`window.dshLauncher.connectDsh(${JSON.stringify(`http://127.0.0.1:${port}/?token=${authToken}`)})`)).ok, true)
   await js('Array.from(document.querySelectorAll("button")).find(b => b.textContent.trim() === "看看代码").click()')
   let guest
   await waitFor(async () => { guest = (await targets()).find(item => item.url.startsWith(`http://127.0.0.1:${port}`)); return Boolean(guest) }, 'packaged native DSH view')
   const guestJs = await inspect(guest)
   await waitFor(() => guestJs('Boolean(document.body && getComputedStyle(document.body).backgroundImage.includes("data:image/webp"))'), 'wallpaper read from app.asar')
+  assert.equal(authExchanges, 1)
+  assert.equal(await guestJs('new URL(location.href).searchParams.has("token")'), false)
   assert.equal(await guestJs('typeof window.dshLauncher'), 'undefined')
   await js('window.dshLauncher.setConfig({ glassEnabled: false })')
   await waitFor(() => guestJs('!getComputedStyle(document.body).backgroundImage.includes("data:image/webp")'), 'disable packaged guest theme')
