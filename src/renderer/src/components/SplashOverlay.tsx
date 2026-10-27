@@ -13,6 +13,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { JSX } from 'react'
 import { useHarness } from '../hooks/useHarness'
 import { useTheme } from '../hooks/useTheme'
+import { APP_NAME } from '../../../shared/brand'
+import appIcon from '../assets/whale.png'
 
 const SIZE = 460
 // Display px clipped off the bottom of the video to hide the AI watermark
@@ -147,7 +149,7 @@ function GlassSplash({ onDone }: { onDone: () => void }): JSX.Element {
     return () => { clearTimeout(timer); window.removeEventListener('keydown', key) }
   }, [])
   return <div className="glass-splash" style={{ backgroundImage: 'linear-gradient(rgba(25, 35, 57, .52), rgba(25, 35, 57, .66)), url("./wallpaper.webp")' }} role="dialog" aria-label={zh ? '启动画面' : 'Starting'}>
-    <div className="glass-splash-brand"><span>DeepSeek</span><small>HARNESS MANAGER</small><i /><p>YOUR SPACE. YOUR IDEAS.</p></div>
+    <div className="glass-splash-brand"><img src={appIcon} alt="" className="brand-splash-icon" /><span>{APP_NAME}</span><small>DA FEI YU</small><i /><p>YOUR SPACE. YOUR IDEAS.</p></div>
     <button className="btn btn-ghost" onClick={onDone}>{zh ? '跳过 · Esc' : 'Skip · Esc'}</button>
   </div>
 }

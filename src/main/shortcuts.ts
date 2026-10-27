@@ -4,9 +4,10 @@
 
 import { spawn } from 'node:child_process'
 import { app } from 'electron'
+import { APP_NAME } from '../shared/brand'
 
-const SHORTCUT_NAME = 'DeepSeek Harness Manager.lnk'
-const START_MENU_FOLDER = 'DeepSeek Harness Manager'
+const SHORTCUT_NAME = `${APP_NAME}.lnk`
+const START_MENU_FOLDER = APP_NAME
 
 /**
  * Ensure desktop + start-menu shortcuts for the packaged app. No-op in dev
@@ -35,7 +36,7 @@ function Ensure-Link($dir) {
   $sc.TargetPath = $target
   $sc.WorkingDirectory = $work
   $sc.IconLocation = "$target,0"
-  $sc.Description = "DeepSeek Harness Manager"
+  $sc.Description = ${JSON.stringify(APP_NAME)}
   $sc.Save()
 }
 Ensure-Link ([Environment]::GetFolderPath('Desktop'))

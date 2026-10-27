@@ -13,7 +13,7 @@ $tempDir = Join-Path $workspaceDir 'work\video-promo-tmp'
 $outputDir = Join-Path $workspaceDir 'outputs'
 
 if (-not $OutputFile) {
-  $OutputFile = Join-Path $outputDir 'DeepSeek-Harness-Manager-宣传视频.mp4'
+  $OutputFile = Join-Path $outputDir '大肥鱼-宣传视频.mp4'
 }
 
 if (-not (Test-Path -LiteralPath $StartupVideo)) {
@@ -164,7 +164,7 @@ $scenes = @(
     Key = '02-embedded'; Kind = 'image'; Asset = 'embedded.png'; Minimum = 9.3
     Title = '真正的桌面体验'
     Subtitle = 'Web 界面直接嵌入应用，独立任务栏图标，工作目录随时切换。'
-    Voice = 'DeepSeek Harness Manager，把原本的网页界面直接嵌入桌面应用。任务栏显示独立图标，工作目录也能随时切换。'
+    Voice = '大肥鱼，把原本的网页界面直接嵌入桌面应用。任务栏显示独立图标，工作目录也能随时切换。'
   },
   [ordered]@{
     Key = '03-dashboard'; Kind = 'image'; Asset = 'dashboard.png'; Minimum = 9.4
@@ -198,9 +198,9 @@ $scenes = @(
   },
   [ordered]@{
     Key = '08-end'; Kind = 'end'; Asset = 'icon.png'; Minimum = 8.2
-    Title = 'DeepSeek Harness Manager'
+    Title = '大肥鱼'
     Subtitle = '开源、免费，为更顺手的 DeepSeek Harness 桌面体验而生。'
-    Voice = 'DeepSeek Harness Manager 现已开源。访问屏幕中的 GitHub 地址，下载最新版本，欢迎体验和提出建议。'
+    Voice = '大肥鱼 现已开源。访问屏幕中的 GitHub 地址，下载最新版本，欢迎体验和提出建议。'
   }
 )
 

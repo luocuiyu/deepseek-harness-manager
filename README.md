@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="resources/icon.png" width="112" alt="DeepSeek Harness Manager 蓝色鲸鱼图标" />
-  <h1>DeepSeek Harness Manager｜DeepSeek Harness 桌面端</h1>
+  <img src="resources/icon.png" width="112" alt="大肥鱼图标" />
+  <h1>大肥鱼｜DeepSeek Harness 桌面助手</h1>
   <p><strong>把 <code>npx @deepseek-ai/dsh web</code> 变成可以双击启动、独立运行和集中管理的 Windows 桌面应用。</strong></p>
   <p>自动启动或接管本机 DSH，在自己的窗口中内嵌 Web UI，并提供会话观察、插件与代理预设管理、软件回收站、API 切换、系统托盘和应用内更新。</p>
 
@@ -10,11 +10,19 @@
   ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows)
   ![Electron](https://img.shields.io/badge/Electron-43-47848F?style=flat-square&logo=electron)
 
-  [下载最新版](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest) · [查看 v0.3.1](https://github.com/luocuiyu/deepseek-harness-manager/releases/tag/v0.3.1) · [English](README.en.md) · [提交问题](https://github.com/luocuiyu/deepseek-harness-manager/issues)
+  [下载最新版](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest) · [查看 v0.3.2](https://github.com/luocuiyu/deepseek-harness-manager/releases/tag/v0.3.2) · [English](README.en.md) · [提交问题](https://github.com/luocuiyu/deepseek-harness-manager/issues)
 </div>
 
 > [!IMPORTANT]
 > 本项目是独立社区项目，并非 DeepSeek 官方产品。项目基于 [MarcoG-h/DSH-Launcher](https://github.com/MarcoG-h/DSH-Launcher) 的 MIT 许可代码继续开发，完整归属见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+## v0.3.2 大肥鱼
+
+- 软件正式名称改为「大肥鱼」，同步窗口、安装器、桌面/开始菜单快捷方式、托盘和更新提示。
+- 使用项目所有者提供的新角色图，生成多尺寸 Windows 图标并更新界面标识。
+- 保留原应用标识、配置目录和 GitHub 更新源，沿用已有设置和 DSH 数据。
+
+![大肥鱼界面（隔离测试环境）](screenshots/v032-home.png)
 
 ## v0.3.1 修复更新
 
@@ -56,11 +64,11 @@ DeepSeek Harness Web 模式通常需要打开终端、执行命令、等待服�
 npx @deepseek-ai/dsh web
 ```
 
-Manager 将这些步骤收敛成一个桌面应用：
+大肥鱼 将这些步骤收敛成一个桌面应用：
 
 ```mermaid
 flowchart LR
-    A["双击鲸鱼图标"] --> B{"3080 端口已有 DSH?"}
+    A["双击大肥鱼图标"] --> B{"3080 端口已有 DSH?"}
     B -- "否" --> C["使用系统 Node.js / npx 启动"]
     B -- "是" --> D["识别并接入外部实例"]
     C --> E["等待服务就绪"]
@@ -69,11 +77,11 @@ flowchart LR
     F --> G["会话 / 插件 / 预设 / 日志 / 设置"]
 ```
 
-1. 双击桌面的蓝色鲸鱼图标。
+1. 双击桌面的「大肥鱼」图标。
 2. 自动检测端口、进程和已有 DSH 实例。
 3. 没有实例时自动启动；已有实例时直接接入，不重复运行第二份。
 4. 首页显示服务就绪后，点击「进入工作区」，在应用自己的 Electron 窗口中显示 DSH。
-5. 任务栏保留 Manager 自己的图标，不依赖默认浏览器标签页。
+5. 任务栏保留 大肥鱼 自己的图标，不依赖默认浏览器标签页。
 
 ## 真实界面
 
@@ -99,7 +107,7 @@ DSH 使用 Electron 原生 `WebContentsView` 显示在应用内部，工作区�
 
 ### 代理预设与软件回收站
 
-`Anchored Standard` 属于代理预设，不是第三方 npm 插件。Manager 会扫描 `DSH_HOME/.agent-presets`，并显示来源、占用情况和文件信息。
+`Anchored Standard` 属于代理预设，不是第三方 npm 插件。大肥鱼 会扫描 `DSH_HOME/.agent-presets`，并显示来源、占用情况和文件信息。
 
 第一次删除只会移动到软件自己的回收站；清空 Windows 回收站不会影响这里的备份。只有在软件回收站中再次确认“永久删除”才会彻底清除。
 
@@ -133,7 +141,7 @@ DSH 使用 Electron 原生 `WebContentsView` 显示在应用内部，工作区�
 
 ## 插件、代理预设和会话是什么关系？
 
-| 对象 | 默认位置 | Manager 提供的操作 |
+| 对象 | 默认位置 | 大肥鱼 提供的操作 |
 | --- | --- | --- |
 | 外部插件 | 当前 profile 的 `package.json` / `node_modules` | 安装、启用、停用、卸载、来源识别 |
 | 本地插件源码 | 默认 `~/DSH-Plugin` | 扫描、安装到当前 profile、打开目录 |
@@ -148,9 +156,9 @@ DSH 使用 Electron 原生 `WebContentsView` 显示在应用内部，工作区�
 ### Windows 安装包（推荐）
 
 1. 打开 [Releases](https://github.com/luocuiyu/deepseek-harness-manager/releases/latest)。
-2. 下载最新的 `DeepSeek-Harness-Manager-<版本>-Setup.exe`。
+2. 下载最新的 `DaFeiYu-<版本>-Setup.exe`。
 3. 运行安装向导，选择安装目录。
-4. 安装完成后，双击桌面或开始菜单中的鲸鱼图标。
+4. 安装完成后，双击桌面或开始菜单中的「大肥鱼」图标。
 
 已安装旧版本时不需要先卸载，直接运行新版安装包覆盖升级即可。
 
@@ -168,17 +176,13 @@ DSH 使用 Electron 原生 `WebContentsView` 显示在应用内部，工作区�
 2. 使用 PowerShell 核对 SHA-256。
 3. 哈希与 Release 页面一致后，在 SmartScreen 界面点击“仍要运行”。部分 Windows 版本需要先点击“更多信息”。
 
-`v0.2.3` 的校验命令：
+新版安装包的校验命令：
 
 ```powershell
-Get-FileHash .\DeepSeek-Harness-Manager-0.2.3-Setup.exe -Algorithm SHA256
+Get-FileHash .\DaFeiYu-0.3.2-Setup.exe -Algorithm SHA256
 ```
 
-预期 SHA-256：
-
-```text
-642A6EFB069A70C3F519D2EF9ED1A60FEDC8CB8689F86AFF41FA6DF2273CA92D
-```
+预期 SHA-256 见同一 Release 附件 `SHA256SUMS.txt`。
 
 > [!CAUTION]
 > 不要从网盘、群文件或不明镜像运行无法核验来源的安装包。正式代码签名或 Microsoft Store 分发已列入后续计划。
@@ -196,9 +200,9 @@ npx @deepseek-ai/dsh web
 进入“设置 → DSH 部署 / 修复”：
 
 1. 在“部署运行环境”中打开 Node.js 官网，安装 Node.js 22.19.0 或更高版本。
-2. 重新打开 Manager，在“部署 DeepSeek Harness”中预下载并验证 `@deepseek-ai/dsh`。
+2. 重新打开 大肥鱼，在“部署 DeepSeek Harness”中预下载并验证 `@deepseek-ai/dsh`。
 
-Manager 不再提供便携 Node 环境，普通运行方式与官方文档保持一致。
+大肥鱼 不再提供便携 Node 环境，普通运行方式与官方文档保持一致。
 
 ## 应用内更新
 
@@ -221,22 +225,22 @@ Manager 不再提供便携 Node 环境，普通运行方式与官方文档保持
 
 | 数据 | 默认位置 / 处理方式 |
 | --- | --- |
-| Manager 普通配置 | Electron `userData/launcher-config.json` |
+| 大肥鱼 普通配置 | Electron `userData/launcher-config.json` |
 | API Key / GitHub Token | `safeStorage` 加密后写入 `launcher-secrets.bin`；Windows 使用 DPAPI |
 | 插件来源台账 | Electron `userData/plugin-provenance.json` |
 | 代理预设回收站 | Electron `userData/agent-preset-trash`；只有再次确认“永久删除”才清除 |
-| DSH profiles / sessions / storage | 默认位于 `~/.dsh`，Manager 不会迁移或覆盖 |
+| DSH profiles / sessions / storage | 默认位于 `~/.dsh`，大肥鱼 不会迁移或覆盖 |
 | 本地插件目录 | 默认 `~/DSH-Plugin`，可以在设置中修改 |
 | 诊断报告 | 用户主动导出；秘密值会替换为 `[configured]` |
 
-应用启用了 Electron `contextIsolation`，渲染层通过受限 preload API 与主进程通信；外部链接不会直接在 Manager 主窗口内导航。
+应用启用了 Electron `contextIsolation`，渲染层通过受限 preload API 与主进程通信；外部链接不会直接在 大肥鱼 主窗口内导航。
 
 ## 常见问题
 
 <details>
 <summary><strong>为什么显示“外部运行中”？</strong></summary>
 
-说明 3080 端口已经存在 DSH，通常是之前手动执行了 `npx @deepseek-ai/dsh web`。Manager 会直接嵌入它；如果希望 Manager 完整接管，可先停止外部实例，再从控制台启动。
+说明 3080 端口已经存在 DSH，通常是之前手动执行了 `npx @deepseek-ai/dsh web`。大肥鱼 会直接嵌入它；如果希望 大肥鱼 完整接管，可先停止外部实例，再从控制台启动。
 </details>
 
 <details>
@@ -248,19 +252,19 @@ Manager 不再提供便携 Node 环境，普通运行方式与官方文档保持
 <details>
 <summary><strong>关闭窗口后 DSH 为什么还在运行？</strong></summary>
 
-默认启用了“关闭到托盘”。右键系统托盘鲸鱼图标并选择退出，或在设置中关闭该选项。是否在退出 Manager 时停止 DSH 可以独立配置。
+默认启用了“关闭到托盘”。右键系统托盘大肥鱼图标并选择退出，或在设置中关闭该选项。是否在退出 大肥鱼 时停止 DSH 可以独立配置。
 </details>
 
 <details>
 <summary><strong>会不会破坏现有的 ~/.dsh？</strong></summary>
 
-不会。Manager 默认复用现有 DSH_HOME。更新内置运行环境不会覆盖 sessions、第三方插件台账或手动配置；代理预设首次删除也只会进入软件回收站。
+不会。大肥鱼 默认复用现有 DSH_HOME。更新内置运行环境不会覆盖 sessions、第三方插件台账或手动配置；代理预设首次删除也只会进入软件回收站。
 </details>
 
 <details>
 <summary><strong>插件为什么显示“历史安装·推断”？</strong></summary>
 
-说明插件在来源台账建立之前就已存在。Manager 会根据包名和依赖 spec 推断来源，但不会伪装成已确认信息。通过 Manager 新安装的插件会记录为 confirmed。
+说明插件在来源台账建立之前就已存在。大肥鱼 会根据包名和依赖 spec 推断来源，但不会伪装成已确认信息。通过 大肥鱼 新安装的插件会记录为 confirmed。
 </details>
 
 ## 本地开发

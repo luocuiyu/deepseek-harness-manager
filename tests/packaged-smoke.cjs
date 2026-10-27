@@ -8,7 +8,7 @@ const http = require('node:http')
 const { spawn } = require('node:child_process')
 
 const repo = path.resolve(__dirname, '..')
-const exe = path.join(repo, 'release/win-unpacked/DeepSeek Harness Manager.exe')
+const exe = path.join(repo, 'release/win-unpacked', `${require('../package.json').build.productName}.exe`)
 const expectedVersion = require('../package.json').version
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'dsh-packaged-test-'))
 let child
@@ -97,6 +97,8 @@ async function main() {
   const js = await inspect(target)
   await waitFor(() => js('Boolean(window.dshLauncher && document.querySelector(".welcome-hero"))'), 'preload bridge and welcome page')
   assert.equal((await js('window.dshLauncher.getUpdateState()')).currentVersion, expectedVersion)
+  assert.equal(await js('document.title'), '大肥鱼')
+  assert.equal(await js('document.querySelector("aside").textContent.includes("大肥鱼")'), true)
   assert.equal((await js('window.dshLauncher.getConfig()')).port, port, 'Temporary user profile must be used')
   await waitFor(() => js('document.querySelector(".app-wallpaper img")?.naturalWidth === 1920'), 'packaged wallpaper')
   assert.equal(await js('document.querySelector(".welcome-hero h1").textContent'), '探索未至之境')

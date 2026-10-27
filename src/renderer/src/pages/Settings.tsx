@@ -8,6 +8,7 @@ import { Toggle } from '../components/Toggle'
 import { AppUpdaterPanel } from '../components/AppUpdaterPanel'
 import { DownloadIcon, RefreshIcon, PowerIcon, PlusIcon, TrashIcon } from '../lib/icons'
 import whaleIcon from '../assets/whale.png'
+import { APP_NAME } from '../../../shared/brand'
 import rueIcon from '../assets/rue.png'
 import proto1Icon from '../assets/proto1.png'
 import cedricIcon from '../assets/cedric.png'
@@ -510,7 +511,7 @@ export function Settings({ tab, onTabChange }: { tab: SettingsTab; onTabChange: 
       <div className="flex justify-center pt-2 select-none">
         <img
           src={whaleIcon}
-          alt="DeepSeek Harness Manager"
+          alt={APP_NAME}
           draggable={false}
           className="w-24 h-24 rounded-3xl object-cover border"
           style={{ background: '#fff', borderColor: 'rgba(128,128,128,0.25)' }}
