@@ -8,6 +8,10 @@ Features include an `npx @deepseek-ai/dsh web` default launch mode, Node.js inst
 
 Plugin availability is profile-wide and does not prove a specific session invoked a plugin. The UI labels this distinction explicitly.
 
+## v0.3.1 — Authentication and responsive layout
+
+The embedded workspace exchanges the real DSH startup token for a browser cookie. Managed web launches use `--no-open` and the configured port, while an unauthenticated external instance can be connected using its printed local URL. Tokens stay out of config and logs. Management pages center and expand on wide screens, deployment settings use two columns, and native-view bounds follow UI zoom. Verification now includes the real upstream DSH web runtime.
+
 ## v0.3.0 — Silver-blue glass
 
 A wallpaper welcome page, compact sidebar, adjustable glass surfaces and a skippable startup reveal. Appearance updates preserve the embedded DSH editor and its draft. The shipped official Messages endpoint is corrected to `/anthropic`, with a narrowly scoped migration that preserves custom gateways.

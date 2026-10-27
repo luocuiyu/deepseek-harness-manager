@@ -86,7 +86,7 @@ export function Sessions({ onOpenDsh }: { onOpenDsh: () => void }): JSX.Element 
 
   if (!ready) {
     return (
-      <div className="p-5 max-w-[1050px]">
+      <div className="content-page sessions-page">
         <div className="panel p-8 text-center">
           <h2 className="text-[18px] font-semibold">{lang === 'zh' ? '会话观察台' : 'Session observer'}</h2>
           <p className="mt-2 text-[13px]" style={{ color: 'var(--muted)' }}>
@@ -98,7 +98,7 @@ export function Sessions({ onOpenDsh }: { onOpenDsh: () => void }): JSX.Element 
   }
 
   return (
-    <div className="p-5 space-y-4 max-w-[1150px]">
+    <div className="content-page sessions-page space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h2 className="text-[18px] font-semibold">{lang === 'zh' ? '会话观察台' : 'Session observer'}</h2>
@@ -111,7 +111,7 @@ export function Sessions({ onOpenDsh }: { onOpenDsh: () => void }): JSX.Element 
 
       {data && !data.ok && <div className="card p-3 text-[12px]" style={{ color: 'var(--warn)' }}>{data.error}</div>}
 
-      <div className="grid grid-cols-[minmax(300px,0.9fr)_minmax(360px,1.1fr)] gap-4 items-start">
+      <div className="session-columns grid gap-4 items-start">
         <section className="space-y-2.5">
           <input className="input" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={lang === 'zh' ? '搜索标题、目录或会话 ID…' : 'Search title, directory, or session ID…'} />
           <div className="text-[11px]" style={{ color: 'var(--muted)' }}>{lang === 'zh' ? `共 ${sessions.length} 个会话` : `${sessions.length} sessions`}</div>

@@ -2,6 +2,7 @@ import { clipboard, dialog, ipcMain, shell } from 'electron'
 import * as balance from './balance'
 import { getConfig, setConfig } from './config'
 import { t } from './i18n'
+import { dshConnection } from './dsh-connection'
 import * as dshview from './dshview'
 import * as harness from './harness'
 import * as orb from './orb'
@@ -24,7 +25,15 @@ export function registerIpc(): void {
   ipcMain.handle('harness:start', () => harness.start())
   ipcMain.handle('harness:stop', () => harness.stop())
   ipcMain.handle('harness:restart', () => harness.restart())
-  ipcMain.handle('harness:openUi', () => shell.openExternal(`http://127.0.0.1:${getConfig().port}`))
+  ipcMain.handle('harness:openUi', () => shell.openExternal(dshConnection.getUrl(getConfig())))
+
+  ipcMain.handle('dsh:connect', (_e, url: string) => {
+    if (typeof url !== 'string' || !dshConnection.enter(url, getConfig())) {
+      return { ok: false, code: null, error: t('请输入当前端口的本机 DSH 完整启动链接（含 token）。', 'Paste the full local DSH startup URL for the configured port, including its token.') }
+    }
+    dshview.invalidateDshConnection()
+    return { ok: true, code: 0 }
+  })
 
   ipcMain.handle('config:get', () => getConfig())
   ipcMain.handle('config:set', (_e, patch: Parameters<typeof setConfig>[0]) => {

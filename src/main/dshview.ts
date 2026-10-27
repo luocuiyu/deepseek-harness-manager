@@ -8,6 +8,8 @@
 
 import { WebContentsView, type BrowserWindow, type WebContents } from 'electron'
 import { getConfig } from './config'
+import { dshConnection } from './dsh-connection'
+import { broadcast } from './bus'
 
 import { SIDEBAR_EXPANDED } from '../shared/appearance'
 import { applyDshAppearance } from './dsh-appearance'
@@ -38,7 +40,7 @@ export function setDshActive(next: boolean, reload?: boolean): void {
   active = next
   if (next && (!loaded || reload) && win) {
     loaded = true
-    void ensureView().loadURL(`http://127.0.0.1:${getConfig().port}`).catch(() => {
+    void ensureView().loadURL(dshConnection.getUrl(getConfig())).catch(() => {
       loaded = false
       console.warn('[dsh] Embedded UI could not be loaded.')
     })
@@ -55,6 +57,9 @@ export function setDshActive(next: boolean, reload?: boolean): void {
 export function ensureView(): WebContents {
   return ensure().webContents
 }
+
+/** A newly entered launch URL must be exchanged before showing a stale page. */
+export function invalidateDshConnection(): void { loaded = false }
 
 /** Apply saved appearance changes without reloading or losing a draft. */
 export function refreshDshAppearance(): void {
@@ -73,6 +78,13 @@ function ensure(): WebContentsView {
       webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true }
     })
     const contents = view.webContents
+    contents.on('did-navigate', (_event, url, code) => {
+      if (code !== 401 || new URL(url).origin !== `http://127.0.0.1:${getConfig().port}`) return
+      loaded = false
+      active = false
+      relayout()
+      broadcast({ type: 'dsh-auth', required: true })
+    })
     contents.on('did-finish-load', () => void applyDshAppearance(contents))
     win.contentView.addChildView(view)
   }
@@ -83,7 +95,9 @@ function relayout(): void {
   if (!win || !view) return
   if (active) {
     const [w, h] = win.getContentSize()
-    const x = sidebarWidth
+    const zoom = win.webContents.getZoomFactor()
+    view.webContents.setZoomFactor(zoom)
+    const x = Math.round(sidebarWidth * zoom)
     view.setBounds({ x, y: 0, width: Math.max(0, w - x), height: h })
     view.setVisible(true)
   } else {

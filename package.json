@@ -1,6 +1,6 @@
 {
   "name": "deepseek-harness-manager",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "DeepSeek Harness desktop control center with embedded UI, sessions, plugin provenance, and diagnostics",
   "main": "./out/main/index.js",
   "author": "lcy",
@@ -15,7 +15,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "dist": "electron-vite build && electron-builder --win",
     "test:desktop": "electron tests/desktop-smoke.cjs",
-    "test:packaged": "node tests/packaged-smoke.cjs"
+    "test:packaged": "node tests/packaged-smoke.cjs",
+    "test:real-dsh": "electron tests/real-dsh-smoke.cjs"
   },
   "build": {
     "appId": "com.community.deepseek-harness-manager",

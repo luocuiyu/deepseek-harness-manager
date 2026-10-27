@@ -5,6 +5,7 @@ import { homedir } from 'node:os'
 import { getActiveApiPreset, getConfig } from './config'
 import { t } from './i18n'
 import { broadcast } from './bus'
+import { dshConnection, managedArgs, lineCollector, redactLaunchTokens } from './dsh-connection'
 import type { HarnessState, LauncherConfig, LogLine } from '../shared/types'
 
 const MAX_LOG = 6000
@@ -44,7 +45,7 @@ function patch(p: Partial<HarnessState>): void {
 }
 
 function pushLine(stream: 'stdout' | 'stderr', raw: string): void {
-  const line = raw.replace(ANSI, '')
+  const line = redactLaunchTokens(raw.replace(ANSI, ''))
   if (!line) return
   const at = Date.now()
   log.push({ stream, line, at })
@@ -52,12 +53,12 @@ function pushLine(stream: 'stdout' | 'stderr', raw: string): void {
   broadcast({ type: 'log', stream, line, at })
 }
 
-function chunkToLines(stream: 'stdout' | 'stderr'): (chunk: Buffer) => void {
-  return (chunk: Buffer) => {
-    const text = chunk.toString('utf8')
-    // Split into lines but keep trailing partials? Simpler: emit each CR/LF-terminated line.
-    for (const line of text.split(/\r?\n/)) pushLine(stream, line)
-  }
+function childLines(stream: 'stdout' | 'stderr'): ReturnType<typeof lineCollector> {
+  return lineCollector((raw) => {
+    const line = raw.replace(ANSI, '')
+    dshConnection.observe(line, getConfig())
+    pushLine(stream, line)
+  })
 }
 
 interface LaunchPlan {
@@ -72,16 +73,16 @@ function launchPlan(cfg: LauncherConfig): LaunchPlan {
   if (cfg.installMode === 'npx') {
     return {
       cmd: cfg.nodePath || (process.platform === 'win32' ? 'npx.cmd' : 'npx'),
-      args: [...(cfg.launchArgs.length ? cfg.launchArgs : ['@deepseek-ai/dsh']), cfg.profile],
+      args: managedArgs(cfg.launchArgs.length ? cfg.launchArgs : ['@deepseek-ai/dsh'], cfg.profile, cfg.port),
       cwd: homedir(),
       envPatch: { DSH_HOME: cfg.dshHome }
     }
   }
   return {
     cmd: cfg.nodePath,
-    args: [...cfg.launchArgs, cfg.profile],
+    args: managedArgs(cfg.launchArgs, cfg.profile, cfg.port),
     cwd: cfg.harnessRepo,
-    envPatch: undefined
+    envPatch: { DSH_HOME: cfg.dshHome }
   }
 }
 
@@ -120,14 +121,14 @@ export async function start(): Promise<{ ok: boolean; error?: string }> {
     exitCode: null,
     lastError: null
   })
+  dshConnection.reset(cfg)
+  broadcast({ type: 'dsh-auth', required: false })
   const modeLabel = cfg.installMode === 'npx' ? 'npx' : t('源码版', 'source build')
   pushLine('stderr', t(`[launcher] 启动 dsh profile "${cfg.profile}" (${modeLabel})`, `[launcher] Starting dsh profile "${cfg.profile}" (${modeLabel})`))
   pushLine('stderr', `[launcher] ${plan.cmd} ${plan.args.join(' ')}`)
 
-  // Inject the active API vendor's endpoint AND key. harness reads
-  // DEEPSEEK_BASE_URL only from the process env at boot (bootstrap-only), and
-  // resolves DEEPSEEK_API_KEY per request with the inherited process env ranked
-  // above .credentials.yaml — so both must be provided here at spawn.
+  // Supply endpoint/key bootstrap defaults. Current DSH may prefer credentials
+  // saved in its own settings; leave that credential store unchanged.
   const preset = getActiveApiPreset()
   const apiEnv: NodeJS.ProcessEnv = {}
   if (preset.baseUrl) apiEnv.DEEPSEEK_BASE_URL = preset.baseUrl
@@ -136,7 +137,7 @@ export async function start(): Promise<{ ok: boolean; error?: string }> {
     pushLine('stderr', t(`[launcher] API 厂商: ${preset.name} (${preset.baseUrl})`, `[launcher] API provider: ${preset.name} (${preset.baseUrl})`))
   }
   if (apiEnv.DEEPSEEK_API_KEY) {
-    pushLine('stderr', t(`[launcher] 已注入该厂商的 API Key(${preset.name}) — 模型调用不再需要去 DSH 界面填 key`, `[launcher] Injected the provider's API key (${preset.name}) — no need to fill it in the DSH UI`))
+    pushLine('stderr', t(`[launcher] 已注入该厂商的 API Key(${preset.name})；DSH 中已保存的凭据可能优先`, `[launcher] Injected the provider's API key (${preset.name}); credentials saved in DSH may take precedence`))
   } else if (apiEnv.DEEPSEEK_BASE_URL) {
     pushLine('stderr', t('[launcher] 该预设未填 API Key — 将使用 ~/.dsh/.credentials.yaml 中已存的 key,若无则模型调用会报 MISSING_CREDENTIAL', '[launcher] This preset has no API Key — falling back to ~/.dsh/.credentials.yaml; without it model calls fail with MISSING_CREDENTIAL'))
   }
@@ -163,8 +164,12 @@ export async function start(): Promise<{ ok: boolean; error?: string }> {
   stopping = false
   patch({ pid: proc.pid ?? null })
 
-  proc.stdout?.on('data', chunkToLines('stdout'))
-  proc.stderr?.on('data', chunkToLines('stderr'))
+  const stdout = childLines('stdout')
+  const stderr = childLines('stderr')
+  proc.stdout?.on('data', stdout.write)
+  proc.stdout?.on('end', stdout.end)
+  proc.stderr?.on('data', stderr.write)
+  proc.stderr?.on('end', stderr.end)
   proc.on('error', (err) => {
     pushLine('stderr', t(`[launcher] 进程错误: ${err.message}`, `[launcher] Process error: ${err.message}`))
     patch({ status: 'error', lastError: err.message })
@@ -213,7 +218,7 @@ function startPortProbe(): void {
     }
     const port = getConfig().port
     probePort(port, (ok) => {
-      if (ok && state.status === 'starting') {
+      if (ok && state.status === 'starting' && (getConfig().profile !== 'web' || dshConnection.isAnnounced(getConfig()))) {
         pushLine('stdout', t(`[launcher] ✔ 就绪 — Web UI: http://127.0.0.1:${port}`, `[launcher] ✔ Ready — Web UI: http://127.0.0.1:${port}`))
         patch({ status: 'running', ready: true })
         stopPortProbe()

@@ -381,3 +381,20 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outlin
 .glass-splash-brand > p { font-size: 10px; letter-spacing: .2em; opacity: .8; }
 .glass-splash > button { position: absolute; bottom: 26px; right: 28px; color: white; border-color: rgba(255,255,255,.3); background: rgba(40, 53, 80, .4); }
 @keyframes glass-reveal { from { opacity: 0; transform: translateY(8px); filter: blur(5px); } to { opacity: 1; transform: none; filter: none; } }
+
+/* Page width follows the available work area rather than sticking to its left. */
+.content-page { box-sizing: border-box; width: 100%; max-width: 1480px; margin-inline: auto; padding: clamp(20px, 2.4vw, 40px); }
+.content-page .panel, .content-page .card { min-width: 0; }
+.content-page .input { min-width: 0; }
+.session-columns { grid-template-columns: minmax(260px, .9fr) minmax(320px, 1.1fr); }
+.connection-card h2 { font-size: 17px; font-weight: 600; }
+.connection-card .label { margin-top: 16px; }
+.connection-card small { color: var(--muted); font-size: 11px; }
+.connection-error { margin-top: 10px; color: #ffd0d8; font-size: 12px; }
+@media (min-width: 1450px) {
+  .settings-deployment { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
+  .settings-deployment > * { margin-block: 0 !important; }
+  .settings-deployment > details, .settings-deployment > :nth-child(n+4) { grid-column: 1 / -1; }
+  .welcome-bottom { max-width: 840px; }
+}
+@media (max-width: 1050px) { .session-columns { grid-template-columns: minmax(0, 1fr); } }
